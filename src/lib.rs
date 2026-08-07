@@ -1,5 +1,5 @@
 //! This library contains an implementation of the q hull algorithm using glam for vector algebra and
-//! rayon for parallelization. Contains the qhull from wikipedia:  https://en.wikipedia.org/wiki/Quickhull
+//! rayon for parallelization. Contains the qhull from wikipedia:  <https://en.wikipedia.org/wiki/Quickhull>
 
 mod geometry_helper;
 
@@ -10,9 +10,13 @@ use rayon::prelude::{
     IndexedParallelIterator, IntoParallelIterator, IntoParallelRefIterator, ParallelIterator,
 };
 
-/// The Triangle with its three indices.
+/// The Triangle with its three indices, these are the indices that have been handed over in the vector
+/// wit the vertices to compute the convex hull from.
 pub struct TriangleIndices(pub usize, pub usize, pub usize);
 
+
+/// The error that can occur if too few vertices have been handed over to compute a convex hull.
+/// it should be minimally 4 in general position.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct TooFewVerticesError;
 

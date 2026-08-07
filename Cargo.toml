@@ -1,0 +1,9 @@
+[package]
+name = "rust_qhull"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+glam = "0.33.3"
+rayon = "1.12.0"
+fxhash = "0.2.1"

@@ -4,7 +4,8 @@
 mod geometry_helper;
 mod hull_construction;
 
-use crate::geometry_helper::Triangle;
+use fxhash::{FxHashMap, FxHashSet};
+use crate::geometry_helper::{Edge, Triangle};
 use crate::hull_construction::{HullConstructor, RELATIVE_TOLERANCE};
 pub use glam::Vec3;
 use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator};
@@ -69,7 +70,7 @@ pub fn generate_convex_hull(vertices: &[Vec3]) -> Result<Vec<TriangleIndices>, C
 /// Runs a consistency check on the vertices and the computed convex hull. It makes sure,
 /// * there is no vertex outside computed convex hull.
 /// * that for every edge there is an edge in opposite direction.
-/// * no hull vertex is inside the hull.
+/// * For s simplex hull we must have F = 2V - 4
 /// Mainly used for test / debug purposes.
 ///
 /// # Example
@@ -107,36 +108,15 @@ pub fn consistency_check(vertices: &[Vec3], convex_hull: &[TriangleIndices]) -> 
         }
     }
 
-    // Now we go over the BB vertices. They appear several times, we do not care about filtering multiples.
-    let failed_inner = convex_hull
-        .iter()
-        .flat_map(|tri| [tri.0, tri.1, tri.2])
-        .any(|index| {
-            let mut failure = true;
-            for tri in &tri_list {
-                failure = failure && tri.get_signed_distance(index) < -tolerance;
-            }
-            failure
-        });
-    if failed_inner {
-        return false;
-    }
-
     // Now we check for closedness every edge must exist exactly once in itself and the reverse direction.
-    for edge in &all_edges {
-        let (forward, backward) =
-            all_edges
-                .iter()
-                .fold((0, 0), |(forward, backward), candidate| {
-                    (
-                        forward + if candidate == edge { 1 } else { 0 },
-                        backward + if *candidate == edge.reversed() { 1 } else { 0 },
-                    )
-                });
-        if forward != 1 || backward != 1 {
-            return false;
-        }
-    }
+    let mut counts: FxHashMap<Edge, u32> = FxHashMap::default();
+    for e in &all_edges { *counts.entry(*e).or_insert(0) += 1; }
+    let closed = counts.iter().all(|(e, &c)| c == 1 && counts.get(&e.reversed()) == Some(&1));
+    if !closed { return false; }
+
+    // Now we get the amount of used vertices in our hull.
+    let used_vertices = FxHashSet::from_iter(tri_list.iter().flat_map(|tri| tri.get_plain_indices())).iter().count();
+    if 2 * tri_list.len() - 4 !=   used_vertices { return false; }
 
     true
 }

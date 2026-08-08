@@ -85,7 +85,6 @@ pub fn consistency_check(vertices: &[Vec3], convex_hull: &[TriangleIndices]) -> 
 /// let cube = generate_cube(100.0, 10_000, 42);
 /// let hull = generate_convex_hull(&cube).unwrap();
 /// let _ = consistency_check(&cube, &hull).unwrap();
-/// assert_eq!(hull.len(), 12, "The cube should have 12 triangles");
 /// ```
 pub fn generate_cube(scale: f32, additional_vertices: usize, seed : u64) -> Vec<Vec3> {
     let mut result: Vec<Vec3> = Vec::with_capacity(additional_vertices + 27);

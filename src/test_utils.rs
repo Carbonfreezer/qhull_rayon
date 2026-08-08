@@ -117,7 +117,7 @@ pub fn generate_cube(scale: f32, additional_vertices: usize, seed: u64) -> Vec<V
     result
 }
 
-/// Generates a random sphere used fdr testing and profiling
+/// Generates a random sphere used for testing and profiling
 ///
 /// # Example
 /// ```
@@ -144,7 +144,7 @@ pub fn generate_sphere(scale: f32, vertices: usize, seed: u64) -> Vec<Vec3> {
     result
 }
 
-/// Generates a random hollow sphere used fdr testing and profiling
+/// Generates a random hollow sphere used for testing and profiling.
 /// Worsed case assumption for this algorithm.
 ///
 /// # Example

@@ -38,8 +38,8 @@ and as line here:
 
 ![sphere full line](performance_shots/sphere_full_lines.svg).
 
-The second one is a box that naturally has a much simpler convex hull with the option to gut in with culling a lot more
-aggressively. For the same measurements the plots are displayed here:
+The second one is a box that naturally has a much simpler convex hull with the option to cut in with culling a lot more
+aggressively. For the same vertex amounts as in the sphere the plots are displayed here:
 
 ![box violin](performance_shots/box_violin.svg)
 and here:

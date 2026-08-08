@@ -2,6 +2,11 @@
 name = "qhull_rayon"
 version = "0.1.0"
 edition = "2024"
+description = "Three dimensional q-hull algorithm parallelized with rayon."
+repository = "https://github.com/Carbonfreezer/qhull_rayon"
+license = "MIT"
+keywords = ["q-hull", "convex_hull", "geometry"]
+readme = "README.md"
 
 [dependencies]
 glam = "0.33.3"

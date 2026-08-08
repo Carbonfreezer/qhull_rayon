@@ -10,6 +10,8 @@ use rayon::prelude::{
     IndexedParallelIterator, IntoParallelIterator, IntoParallelRefIterator, ParallelIterator,
 };
 
+const RELATIVE_TOLERANCE: f32 = 1e-6;
+
 /// The Triangle with its three indices, these are the indices that have been handed over in the vector
 /// wit the vertices to compute the convex hull from.
 pub struct TriangleIndices(pub usize, pub usize, pub usize);
@@ -49,8 +51,8 @@ struct HullConstructor<'a> {
     hull_triangles: Vec<Triangle<'a>>,
     /// The list with the indices into the vertices that still have to be processed.
     indices_to_process: Vec<usize>,
-    /// The scale we use for tolerance checks.
-    scale : f32,
+    /// The barrier we use for tolerance checks.
+    tolerance: f32,
 }
 
 impl<'a> HullConstructor<'a> {
@@ -61,7 +63,7 @@ impl<'a> HullConstructor<'a> {
             vertices,
             indices_to_process,
             hull_triangles: Vec::new(),
-            scale: 1.0,
+            tolerance: 1.0,
         }
     }
 
@@ -91,8 +93,8 @@ impl<'a> HullConstructor<'a> {
             "The initial tetrahedron must be empty."
         );
 
-        // The first vertex is the one furthest out.
-        let i0 = self.get_best_index_and_remove(|i| self.vertices[i].length());
+        // The first vertex is the one furthest out in x
+        let i0 = self.get_best_index_and_remove(|i| self.vertices[i].x);
         let pos0 = self.vertices[i0];
         // The second vertex is the one furthest away from first.
         let i1 = self.get_best_index_and_remove(|i| (self.vertices[i] - pos0).length_squared());
@@ -123,7 +125,7 @@ impl<'a> HullConstructor<'a> {
             return Err(ConvexHullError::DegenerateInput);
         }
         // Field gets a linear scale.
-        self.scale = a.length();
+        self.tolerance = RELATIVE_TOLERANCE * a.length() ;
 
 
         let mut triangles = vec![
@@ -180,12 +182,13 @@ impl<'a> HullConstructor<'a> {
             .indices_to_process
             .par_iter()
             .zip(highest_signed_distance.into_par_iter())
-            .filter_map(|(&i, dist)| (i != next_vertex && dist  > f32::EPSILON *  self.scale).then_some(i))
+            .filter_map(|(&i, dist)| (i != next_vertex && dist  > self.tolerance).then_some(i))
             .collect();
 
         next_vertex
     }
 
+    /// The inner call to generate a convex hull.
     fn generate_convex_hull(&mut self) -> Result<(), ConvexHullError> {
         self.build_initial_tetrahedron()?;
         while !self.indices_to_process.is_empty() {

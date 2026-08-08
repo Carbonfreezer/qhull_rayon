@@ -8,7 +8,7 @@ use rayon::prelude::{
     IndexedParallelIterator, IntoParallelIterator, IntoParallelRefIterator, ParallelIterator,
 };
 
-const RELATIVE_TOLERANCE: f32 = 1e-6;
+pub const RELATIVE_TOLERANCE: f32 = 1e-6;
 
 pub(crate) struct HullConstructor<'a> {
     /// The vertices we still need to process.
@@ -133,13 +133,13 @@ impl<'a> HullConstructor<'a> {
             .enumerate()
             .max_by(|a, b| a.1.total_cmp(b.1))
             .expect("indices_to_process is non-empty per loop condition");
-        
+
         // In this case we have only inner points left.
         if *highest_value <= self.tolerance {
             self.indices_to_process.clear();
             return None;
         }
-        
+
         let next_vertex = self.indices_to_process[best_position];
         // Filter out the all vertices we do not need any more.
         debug_assert_eq!(

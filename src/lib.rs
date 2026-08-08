@@ -109,39 +109,44 @@ impl<'a> HullConstructor<'a> {
         Ok(())
     }
 
+    /// Analyzes the existing vertices and finds the index that is furthest away from the existing hull
+    /// and removes all vertices that are inside the hull.
+    fn get_best_vertex_index_and_sweep(&mut self) -> usize {
+        // Get highest signed distance for every vertex.
+        let highest_signed_distance = self
+            .indices_to_process
+            .par_iter()
+            .map(|i| {
+                self.hull_triangles
+                    .iter()
+                    .map(|tri| tri.get_signed_distance(*i))
+                    .fold(f32::NEG_INFINITY ,f32::max)
+            })
+            .collect::<Vec<_>>();
+        // Get the position with the max value.
+        let (best_position, highest_value) = highest_signed_distance
+            .par_iter()
+            .enumerate()
+            .max_by(|a, b| a.1.total_cmp(b.1))
+            .expect("indices_to_process is non-empty per loop condition");
+        debug_assert!(*highest_value >= 0.0, "There should be at least one outer vertex left");
+        let next_vertex = self.indices_to_process[best_position];
+        // Filter out the all vertices we do not need any more.
+        debug_assert_eq!(self.indices_to_process.len(), highest_signed_distance.len(), "The two vectors should be of same length");
+        self.indices_to_process = self
+            .indices_to_process
+            .par_iter()
+            .zip(highest_signed_distance.into_par_iter())
+            .filter_map(|(&i, dist)| (i != next_vertex && dist > f32::EPSILON).then_some(i))
+            .collect();
+
+        next_vertex
+    }
+
     fn generate_convex_hull(&mut self) -> Result<(), TooFewVerticesError> {
         self.build_initial_tetrahedron()?;
         while !self.indices_to_process.is_empty() {
-            // Get highest signed distance for every vertex.
-            let highest_signed_distance = self
-                .indices_to_process
-                .par_iter()
-                .map(|i| {
-                    self.hull_triangles
-                        .iter()
-                        .map(|tri| tri.get_signed_distance(*i))
-                        .reduce(f32::max)
-                        .unwrap()
-                })
-                .collect::<Vec<_>>();
-            // Get the position with the max value.
-            let (best_position, highest_value) = highest_signed_distance
-                .par_iter()
-                .enumerate()
-                .max_by(|a, b| a.1.total_cmp(b.1))
-                .expect("indices_to_process is non-empty per loop condition");
-            debug_assert!(*highest_value >= 0.0, "There should be at least one outer vertex left");
-            let next_vertex = self.indices_to_process[best_position];
-            // Filter out the all vertices we do not need any more.
-            debug_assert_eq!(self.indices_to_process.len(), highest_signed_distance.len(), "The two vectors should be of same length");
-            self.indices_to_process = self
-                .indices_to_process
-                .par_iter()
-                .zip(highest_signed_distance.into_par_iter())
-                .filter_map(|(&i, dist)| (i != next_vertex && dist > f32::EPSILON).then_some(i))
-                .collect();
-
-
+            let next_vertex = self.get_best_vertex_index_and_sweep();
             let (mut remaining, deleted): (Vec<_>, Vec<_>) = self
                 .hull_triangles
                 .par_iter()

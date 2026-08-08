@@ -1,3 +1,7 @@
+//! This module contains a series of methods that are mean for profiling and testing.
+//! They fall into the category of generating vertices to generate convex hulls from and for
+//! making consistency checks on computed convex hulls.
+
 use crate::TriangleIndices;
 use crate::geometry_helper::{Edge, Triangle};
 use crate::hull_construction::RELATIVE_TOLERANCE;
@@ -22,6 +26,7 @@ pub enum ConsistencyError {
 /// * there is no vertex outside computed convex hull.
 /// * that for every edge there is an edge in opposite direction.
 /// * For s simplex hull we must have F = 2V - 4
+///
 /// Mainly used for test / debug purposes.
 ///
 /// # Example
@@ -76,8 +81,12 @@ pub fn consistency_check(
     }
 
     // Now we get the amount of used vertices in our hull.
-    let used_vertices =
-        FxHashSet::from_iter(tri_list.iter().flat_map(|tri| tri.get_triple_representation().get_array())).len();
+    let used_vertices = FxHashSet::from_iter(
+        tri_list
+            .iter()
+            .flat_map(|tri| tri.get_triple_representation().get_array()),
+    )
+    .len();
     if tri_list.len() + 4 != 2 * used_vertices {
         return Err(ConsistencyError::EulerRelationError);
     }
@@ -85,7 +94,8 @@ pub fn consistency_check(
     Ok(())
 }
 
-/// Generates an  axis parallel cube with several inner points.
+/// Generates an  axis parallel cube with several inner points. Additional vertices are the number
+/// of vertices that come on top of 27 vertices that are already on the surface of the cube.
 ///
 /// # Example
 /// ```
@@ -117,7 +127,8 @@ pub fn generate_cube(scale: f32, additional_vertices: usize, seed: u64) -> Vec<V
     result
 }
 
-/// Generates a random sphere used for testing and profiling
+/// Generates a random sphere used for testing and profiling.
+/// Vertices are located on the inner side of the sphere. 
 ///
 /// # Example
 /// ```
@@ -145,7 +156,8 @@ pub fn generate_sphere(scale: f32, vertices: usize, seed: u64) -> Vec<Vec3> {
 }
 
 /// Generates a random hollow sphere used for testing and profiling.
-/// Worsed case assumption for this algorithm.
+/// Vertices are only located on the sphere surface. 
+/// This is the worst case assumption for this algorithm.
 ///
 /// # Example
 /// ```

@@ -1,6 +1,8 @@
 //! This library contains an implementation of the q hull algorithm using glam for vector algebra and
 //! rayon for parallelization. Uses an adaptation  [q-hull](https://en.wikipedia.org/wiki/Quickhull) for three dimensions.
-//! For vector representation we use the [glam library](https://docs.rs/glam/latest/glam/)
+//! For vector representation we use the [glam library](https://docs.rs/glam/latest/glam/). This library shines
+//! performance wise, when you can expect many inner vertices that do not belong to the hull, what
+//! is the standard use case for collision geometry.
 
 mod geometry_helper;
 mod hull_construction;
@@ -14,8 +16,13 @@ use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator};
 
 /// The Triangle with its three indices, these are the indices that have been handed over in the vector
 /// wit the vertices to compute the convex hull from.
-#[derive(Clone, Debug, Eq, Hash, PartialEq, PartialOrd)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
 pub struct TriangleIndices(pub usize, pub usize, pub usize);
+
+impl TriangleIndices {
+    /// Gets the inner indices as an array. Useful for further processing with iterators.
+    pub fn get_array(&self) -> [usize; 3] {[self.0, self.1, self.2]}
+}
 
 /// All errors that can happen in the handed over.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

@@ -14,7 +14,6 @@ use rayon::prelude::{
 /// wit the vertices to compute the convex hull from.
 pub struct TriangleIndices(pub usize, pub usize, pub usize);
 
-
 /// The error that can occur if too few vertices have been handed over to compute a convex hull.
 /// it should be minimally 4 in general position.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -72,20 +71,6 @@ impl<'a> HullConstructor<'a> {
         Some(result)
     }
 
-    /// Removes all inner vertices in the hull.
-    fn remove_all_inner_vertices(&mut self) {
-        self.indices_to_process = self
-            .indices_to_process
-            .par_iter()
-            .filter(|&&i| {
-                self.hull_triangles
-                    .iter()
-                    .any(move |tri| tri.get_signed_distance(i) > f32::EPSILON)
-            })
-            .copied()
-            .collect::<Vec<_>>();
-    }
-
     /// Builds an initial tetrahedron from the inner vertices.
     fn build_initial_tetrahedron(&mut self) -> Result<(), TooFewVerticesError> {
         debug_assert!(
@@ -126,18 +111,36 @@ impl<'a> HullConstructor<'a> {
 
     fn generate_convex_hull(&mut self) -> Result<(), TooFewVerticesError> {
         self.build_initial_tetrahedron()?;
-        self.remove_all_inner_vertices();
         while !self.indices_to_process.is_empty() {
-            let (inner, next_vertex) = self
-                .get_best_index(|i| {
+            // Get highest signed distance for every vertex.
+            let highest_signed_distance = self
+                .indices_to_process
+                .par_iter()
+                .map(|i| {
                     self.hull_triangles
                         .iter()
-                        .map(|tri| tri.get_signed_distance(i))
+                        .map(|tri| tri.get_signed_distance(*i))
                         .reduce(f32::max)
                         .unwrap()
                 })
-                .expect("Emptyness for indices_to_process already filtered in loop.");
-            self.indices_to_process.swap_remove(inner);
+                .collect::<Vec<_>>();
+            // Get the position with the max value.
+            let (best_position, highest_value) = highest_signed_distance
+                .par_iter()
+                .enumerate()
+                .max_by(|a, b| a.1.total_cmp(b.1))
+                .expect("indices_to_process is non-empty per loop condition");
+            debug_assert!(*highest_value >= 0.0, "There should be at least one outer vertex left");
+            let next_vertex = self.indices_to_process[best_position];
+            // Filter out the all vertices we do not need any more.
+            debug_assert_eq!(self.indices_to_process.len(), highest_signed_distance.len(), "The two vectors should be of same length");
+            self.indices_to_process = self
+                .indices_to_process
+                .par_iter()
+                .zip(highest_signed_distance.into_par_iter())
+                .filter_map(|(&i, dist)| (i != next_vertex && dist > f32::EPSILON).then_some(i))
+                .collect();
+
 
             let (mut remaining, deleted): (Vec<_>, Vec<_>) = self
                 .hull_triangles
@@ -159,7 +162,6 @@ impl<'a> HullConstructor<'a> {
                     .map(|edge| Triangle::from_edge_and_points(self.vertices, edge, next_vertex)),
             );
             self.hull_triangles = remaining;
-            self.remove_all_inner_vertices();
         }
 
         Ok(())

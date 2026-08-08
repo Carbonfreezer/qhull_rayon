@@ -89,14 +89,7 @@ impl<'a> Triangle<'a> {
             self.used_indices[2],
         )
     }
-
-    // This method is used in the test suite.
-    #[allow(dead_code)]
-    /// Gets the plain indices of the triangle.
-    pub(crate) fn get_plain_indices(&self) -> [usize; 3] {
-        self.used_indices
-    }
-
+    
     /// Gets the signed distance handed over from another triangle,
     pub(crate) fn get_signed_distance(&self, other_index: usize) -> f32 {
         self.normal

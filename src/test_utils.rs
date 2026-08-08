@@ -77,7 +77,7 @@ pub fn consistency_check(
 
     // Now we get the amount of used vertices in our hull.
     let used_vertices =
-        FxHashSet::from_iter(tri_list.iter().flat_map(|tri| tri.get_plain_indices())).len();
+        FxHashSet::from_iter(tri_list.iter().flat_map(|tri| tri.get_triple_representation().get_array())).len();
     if tri_list.len() + 4 != 2 * used_vertices {
         return Err(ConsistencyError::EulerRelationError);
     }

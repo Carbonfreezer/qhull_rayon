@@ -1,5 +1,6 @@
 // ! This part contains the real construction of the convex hull.
 
+use std::mem::take;
 use fxhash::FxHashSet;
 use glam::Vec3;
 use crate::{ConvexHullError, TriangleIndices};
@@ -165,15 +166,14 @@ impl<'a> HullConstructor<'a> {
             let Some(next_vertex) = self.get_best_vertex_index_and_sweep() else {break;};
 
             // Partition the triangles in to be deleted and remaining.
-            let (mut remaining, deleted): (Vec<_>, Vec<_>) = self
-                .hull_triangles
-                .iter()
-                .cloned()
+            let (mut remaining, deleted): (Vec<_>, Vec<_>) =  take(&mut self
+                .hull_triangles)
+                .into_iter()
                 .partition(|tri| tri.get_signed_distance(next_vertex) <= 0.0);
 
             // Extract the outer boundary edges of the elements that get deleted.
             let all_edges = deleted
-                .iter()
+                .into_iter()
                 .flat_map(|tri| tri.edges())
                 .collect::<FxHashSet<_>>();
             let boundary_edges = all_edges

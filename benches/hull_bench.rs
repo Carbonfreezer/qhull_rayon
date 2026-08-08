@@ -1,0 +1,21 @@
+
+
+use criterion::{ criterion_group, criterion_main, BenchmarkId, Criterion};
+use qhull_rayon::*;
+use qhull_rayon::test_utils::*;
+
+fn bench_sphere(c: &mut Criterion) {
+    let mut group = c.benchmark_group("sphere");
+
+    for n in [50usize, 1000, 10_000, 40_000, 100_000] {
+        group.bench_with_input(BenchmarkId::new("sphere", n), &n, |b, &n| {
+            let vertices = generate_sphere(1.0, n, 42);
+            b.iter(|| {let _ = generate_convex_hull(&vertices);});
+        });
+    }
+    group.finish();
+}
+
+
+criterion_group!(benches, bench_sphere);
+criterion_main!(benches);

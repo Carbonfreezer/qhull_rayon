@@ -16,5 +16,10 @@ test-utils = ["dep:itertools", "dep:rand"]
 [dev-dependencies]
 qhull_rayon = { path = ".", features = ["test-utils"] }
 proptest = "1.11.0"
+criterion = { version = "0.8.2", features = ["html_reports"] }
 
+
+[[bench]]
+name = "hull_bench"
+harness = false
 

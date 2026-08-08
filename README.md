@@ -2,9 +2,9 @@
 
 ## Overview
 
-This is a rayon parallelized version of the [q-hull](https://en.wikipedia.org/wiki/Quickhull) algorithm in 3D.
-For vertices it uses the [glam library]((https://docs.rs/glam/latest/glam/)) and works on `f32`. This algorithm is
-optimized for colling so it works geometries with a lot of inner vertices.
+This is a rayon parallelized version of the [q-hull](https://en.wikipedia.org/wiki/Quickhull) algorithm in 3D. For
+vertices it uses the [glam library]((https://docs.rs/glam/latest/glam/)) and works on `f32`. This algorithm is optimized
+for culling so it works best with geometries that have a lot of inner vertices like you may get for collision proxies.
 
 ## Basic usage example
 
@@ -31,25 +31,25 @@ It also comes with a benchmark system
 
 Benches get executed with three different types of data set. The first one is a sphere where points are evenly
 distributed within the sphere. Measurements are done here via Criterion on 50, 1000, 10_000, 40_000 and 100_000 data
-points. The computations distributions are shown here: 
+points. The computations distributions are shown here:
 
 ![sphere full violin](performance_shots/sphere_full_violin.svg)
-and as line here: 
+and as line here:
 
 ![sphere full line](performance_shots/sphere_full_lines.svg).
 
 The second one is a box that naturally has a much simpler convex hull with the option to gut in with culling a lot more
-aggressively. For the same measurements the plots are displayed here: 
+aggressively. For the same measurements the plots are displayed here:
 
 ![box violin](performance_shots/box_violin.svg)
-and here: 
+and here:
 
 ![box lines](performance_shots/box_lines.svg).
 
 The achilles heel of this algorithms is a point cloud where all points belong to the convex hull. In this case there are
-faster implementations that track the correspondence between faces and vertices and rely less on culling.
-To demonstrate this effect we use a data set, that contains vertices, that all reside on a sphere surface.
-Here we restrict ourselves to vertex amounts of 100, 1_000, 1_500 and 2_000 vertices. This one also comes with a violin plot:
+faster implementations that track the correspondence between faces and vertices and rely less on culling. To demonstrate
+this effect we use a data set, that contains vertices, that all reside on a sphere surface. Here we restrict ourselves
+to vertex amounts of 100, 1_000, 1_500 and 2_000 vertices. This one also comes with a violin plot:
 
 ![hollow sphere violin](performance_shots/sphere_hollow_violin.svg) and a line plot:
 

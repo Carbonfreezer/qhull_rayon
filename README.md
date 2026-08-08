@@ -1,5 +1,7 @@
 # Q-Hull Rayon
 
+![License](https://img.shields.io/badge/license-MIT-green)
+![Built with](https://img.shields.io/badge/built%20with-Rust%20-orange)
 ## Overview
 
 This is a rayon parallelized version of the [q-hull](https://en.wikipedia.org/wiki/Quickhull) algorithm in 3D. For
@@ -38,7 +40,7 @@ The bundle comes with an example, that can be started by:
 > `cargo run --release --example obj_converter -- test_data/in_file.obj test_data/out_file.obj`
 
 The example takes the exported Suzanne monkey from Blender and computes the convex hull. A rendering of the result can
-be seen here: ![monkey with convex hull]([test_data/Monkey.png](https://raw.githubusercontent.com/Carbonfreezer/qhull_rayon/main/test_data/Monkey.png)).
+be seen here: ![monkey with convex hull](https://raw.githubusercontent.com/Carbonfreezer/qhull_rayon/main/test_data/Monkey.png).
 
 It also comes with a benchmark system
 > `cargo bench`
@@ -58,7 +60,7 @@ points. The time used on a computer with an AMD Ryzen 9 9950X3D2 was
 
 The computations distributions are shown here:
 
-![sphere full line](performance_shots/sphere_full_lines.png).
+![sphere full line](https://raw.githubusercontent.com/Carbonfreezer/qhull_rayon/main/performance_shots/sphere_full_lines.png).
 
 The second one is a box that naturally has a much simpler convex hull with the option to cut in with culling a lot more
 aggressively. In this experiment the same amount of vertices were used. The timing table is:
@@ -74,7 +76,7 @@ aggressively. In this experiment the same amount of vertices were used. The timi
 
 The corresponding line plot displayed here:
 
-![box lines](performance_shots/box_lines.png).
+![box lines](https://raw.githubusercontent.com/Carbonfreezer/qhull_rayon/main/performance_shots/box_lines.png).
 
 The achilles heel of this algorithms is a point cloud where all points belong to the convex hull. In this case there are
 faster implementations that track the correspondence between faces and vertices and rely less on culling. To demonstrate
@@ -91,7 +93,7 @@ to vertex amounts of 100, 1_000, 1_500 and 2_000 vertices. The timing result is 
 
 This one also comes with a plot:
 
-![hollow sphere lines](performance_shots/sphere_hollow_lines.png)
+![hollow sphere lines](https://raw.githubusercontent.com/Carbonfreezer/qhull_rayon/main/performance_shots/sphere_hollow_lines.png)
 
 The efficiency of the algorithm hinges clearly on its culling ability.
 

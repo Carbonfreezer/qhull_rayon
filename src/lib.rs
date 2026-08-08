@@ -146,12 +146,17 @@ impl<'a> HullConstructor<'a> {
     fn generate_convex_hull(&mut self) -> Result<(), TooFewVerticesError> {
         self.build_initial_tetrahedron()?;
         while !self.indices_to_process.is_empty() {
+            // Get the index the furthest away and remove all inner vertices along the way.
             let next_vertex = self.get_best_vertex_index_and_sweep();
+
+            // Partition the triangles in to be deleted and remaining.
             let (mut remaining, deleted): (Vec<_>, Vec<_>) = self
                 .hull_triangles
                 .par_iter()
                 .cloned()
                 .partition(|tri| tri.get_signed_distance(next_vertex) <= 0.0);
+
+            // Extract the outer boundary edges of the elements that get deleted.
             let all_edges = deleted
                 .into_par_iter()
                 .flat_map(|tri| tri.edges())
@@ -161,6 +166,7 @@ impl<'a> HullConstructor<'a> {
                 .filter(|edge| !all_edges.contains(&edge.reversed()))
                 .collect::<Vec<_>>();
 
+            // Construct the kitting triangles from the boundary to the new vertex.
             remaining.extend(
                 boundary_edges
                     .into_iter()

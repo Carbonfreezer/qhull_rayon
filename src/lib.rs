@@ -49,7 +49,7 @@ impl std::error::Error for ConvexHullError {}
 /// # Example
 /// ```
 /// use glam::Vec3;
-/// use rust_qhull::generate_convex_hull;
+/// use qhull_rayon::generate_convex_hull;
 /// let positions = [Vec3{x:0.0, y:0.0, z:0.0}, Vec3{x:1.0, y:0.0, z:0.0}, Vec3{x:0.0, y:1.0, z:0.0}, Vec3{x:0.0, y:0.0, z:1.0}, Vec3{x:0.1, y:0.1, z:0.1}];
 /// let result = generate_convex_hull(&positions).expect("Input should be fine");
 /// assert_eq!(result.len(), 4, "We should get the four triangles of the outer tetrahedron");

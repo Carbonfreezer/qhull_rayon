@@ -1,9 +1,7 @@
 [package]
-name = "rust_qhull"
+name = "qhull_rayon"
 version = "0.1.0"
 edition = "2024"
-
-
 
 [dependencies]
 glam = "0.33.3"
@@ -16,6 +14,7 @@ rand = { version = "0.10.2", optional = true }
 test-utils = ["dep:itertools", "dep:rand"]
 
 [dev-dependencies]
-rust_qhull = { path = ".", features = ["test-utils"] }
+qhull_rayon = { path = ".", features = ["test-utils"] }
+proptest = "1.11.0"
 
 

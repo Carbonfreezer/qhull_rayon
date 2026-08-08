@@ -8,10 +8,6 @@ use crate::hull_construction::RELATIVE_TOLERANCE;
 use crate::TriangleIndices;
 
 
-/// The seed used in the random number generator
-const RANDOM_SEED : u64 = 42;
-
-
 /// The consistency check errors found.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum ConsistencyError {
@@ -32,8 +28,8 @@ pub enum ConsistencyError {
 /// # Example
 /// ```
 /// use glam::Vec3;
-/// use rust_qhull::{generate_convex_hull};
-/// use rust_qhull::test_utils::consistency_check;
+/// use qhull_rayon::{generate_convex_hull};
+/// use qhull_rayon::test_utils::consistency_check;
 /// let positions = [Vec3{x:0.0, y:0.0, z:0.0}, Vec3{x:1.0, y:0.0, z:0.0}, Vec3{x:0.0, y:1.0, z:0.0}, Vec3{x:0.0, y:0.0, z:1.0}, Vec3{x:0.1, y:0.1, z:0.1}];
 /// let result = generate_convex_hull(&positions).expect("Input should be fine");
 /// assert_eq!(consistency_check(&positions, &result), Ok(()), "Something went wrong");
@@ -84,16 +80,16 @@ pub fn consistency_check(vertices: &[Vec3], convex_hull: &[TriangleIndices]) -> 
 ///
 /// # Example
 /// ```
-/// use rust_qhull::generate_convex_hull;
-/// use rust_qhull::test_utils::{consistency_check, generate_cube};
-/// let cube = generate_cube(100.0, 10_000);
+/// use qhull_rayon::generate_convex_hull;
+/// use qhull_rayon::test_utils::{consistency_check, generate_cube};
+/// let cube = generate_cube(100.0, 10_000, 42);
 /// let hull = generate_convex_hull(&cube).unwrap();
 /// let _ = consistency_check(&cube, &hull).unwrap();
 /// assert_eq!(hull.len(), 12, "The cube should have 12 triangles");
 /// ```
-pub fn generate_cube(scale: f32, additional_vertices: usize) -> Vec<Vec3> {
+pub fn generate_cube(scale: f32, additional_vertices: usize, seed : u64) -> Vec<Vec3> {
     let mut result: Vec<Vec3> = Vec::with_capacity(additional_vertices + 27);
-    let mut rng = StdRng::seed_from_u64(RANDOM_SEED);
+    let mut rng = StdRng::seed_from_u64(seed);
 
     // We add additional coplanar vertices.
     for (x,y,z) in iproduct!(-1..=1, -1..=1, -1..=1) {
@@ -117,14 +113,14 @@ pub fn generate_cube(scale: f32, additional_vertices: usize) -> Vec<Vec3> {
 ///
 /// # Example
 /// ```
-/// use rust_qhull::generate_convex_hull;
-/// use rust_qhull::test_utils::{consistency_check, generate_sphere};
-/// let sphere = generate_sphere(100.0, 10_000);
+/// use qhull_rayon::generate_convex_hull;
+/// use qhull_rayon::test_utils::{consistency_check, generate_sphere};
+/// let sphere = generate_sphere(100.0, 10_000, 42);
 /// let hull = generate_convex_hull(&sphere).unwrap();
 /// let _ = consistency_check(&sphere, &hull).unwrap();
 /// ```
-pub fn generate_sphere(scale: f32, vertices : usize) -> Vec<Vec3> {
-    let mut rng = StdRng::seed_from_u64(RANDOM_SEED);
+pub fn generate_sphere(scale: f32, vertices : usize, seed : u64) -> Vec<Vec3> {
+    let mut rng = StdRng::seed_from_u64(seed);
     let mut result: Vec<Vec3> = Vec::with_capacity(vertices);
 
     for _ in 0..vertices {

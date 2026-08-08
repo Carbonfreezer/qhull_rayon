@@ -10,7 +10,7 @@ mod hull_construction;
 #[cfg(feature = "test-utils")]
 pub mod test_utils;
 
-use crate::hull_construction::{HullConstructor};
+use crate::hull_construction::HullConstructor;
 pub use glam::Vec3;
 use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator};
 
@@ -21,7 +21,9 @@ pub struct TriangleIndices(pub usize, pub usize, pub usize);
 
 impl TriangleIndices {
     /// Gets the inner indices as an array. Useful for further processing with iterators.
-    pub fn get_array(&self) -> [usize; 3] {[self.0, self.1, self.2]}
+    pub fn get_array(&self) -> [usize; 3] {
+        [self.0, self.1, self.2]
+    }
 }
 
 /// All errors that can happen in the handed over.
@@ -76,4 +78,3 @@ pub fn generate_convex_hull(vertices: &[Vec3]) -> Result<Vec<TriangleIndices>, C
     let mut constructor = HullConstructor::new(vertices);
     constructor.generate_convex_hull()
 }
-

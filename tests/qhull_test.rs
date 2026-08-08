@@ -1,9 +1,7 @@
 //! Test for te qhull library.
-use qhull_rayon::*;
-use qhull_rayon::test_utils::*;
 use proptest::prelude::*;
-
-
+use qhull_rayon::test_utils::*;
+use qhull_rayon::*;
 
 // Tests
 proptest! {
@@ -39,4 +37,3 @@ proptest! {
        }
     }
 }
-

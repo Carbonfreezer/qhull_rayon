@@ -1,13 +1,13 @@
 // ! This part contains the real construction of the convex hull.
 
-use std::mem::take;
+use crate::geometry_helper::Triangle;
+use crate::{ConvexHullError, TriangleIndices};
 use fxhash::FxHashSet;
 use glam::Vec3;
-use crate::{ConvexHullError, TriangleIndices};
-use crate::geometry_helper::Triangle;
 use rayon::prelude::{
     IndexedParallelIterator, IntoParallelIterator, IntoParallelRefIterator, ParallelIterator,
 };
+use std::mem::take;
 
 pub const RELATIVE_TOLERANCE: f32 = 1e-6;
 
@@ -92,8 +92,7 @@ impl<'a> HullConstructor<'a> {
             return Err(ConvexHullError::DegenerateInput);
         }
         // Field gets a linear scale.
-        self.tolerance = RELATIVE_TOLERANCE * a.length() ;
-
+        self.tolerance = RELATIVE_TOLERANCE * a.length();
 
         let mut triangles = vec![
             Triangle::new(self.vertices, [i0, i1, i2]),
@@ -101,7 +100,6 @@ impl<'a> HullConstructor<'a> {
             Triangle::new(self.vertices, [i2, i1, i3]),
             Triangle::new(self.vertices, [i3, i0, i2]),
         ];
-
 
         if triangles[0].get_signed_distance(i3) > 0.0 {
             triangles = triangles
@@ -152,7 +150,7 @@ impl<'a> HullConstructor<'a> {
             .indices_to_process
             .par_iter()
             .zip(highest_signed_distance.into_par_iter())
-            .filter_map(|(&i, dist)| (i != next_vertex && dist  > self.tolerance).then_some(i))
+            .filter_map(|(&i, dist)| (i != next_vertex && dist > self.tolerance).then_some(i))
             .collect();
 
         Some(next_vertex)
@@ -163,11 +161,12 @@ impl<'a> HullConstructor<'a> {
         self.build_initial_tetrahedron()?;
         while !self.indices_to_process.is_empty() {
             // Get the index the furthest away and remove all inner vertices along the way.
-            let Some(next_vertex) = self.get_best_vertex_index_and_sweep() else {break;};
+            let Some(next_vertex) = self.get_best_vertex_index_and_sweep() else {
+                break;
+            };
 
             // Partition the triangles in to be deleted and remaining.
-            let (mut remaining, deleted): (Vec<_>, Vec<_>) =  take(&mut self
-                .hull_triangles)
+            let (mut remaining, deleted): (Vec<_>, Vec<_>) = take(&mut self.hull_triangles)
                 .into_iter()
                 .partition(|tri| tri.get_signed_distance(next_vertex) <= 0.0);
 
@@ -190,7 +189,8 @@ impl<'a> HullConstructor<'a> {
             self.hull_triangles = remaining;
         }
 
-        Ok( self.hull_triangles
+        Ok(self
+            .hull_triangles
             .iter()
             .map(|tri| tri.get_triple_representation())
             .collect())

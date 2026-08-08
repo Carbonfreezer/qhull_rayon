@@ -1,12 +1,11 @@
+use crate::TriangleIndices;
+use crate::geometry_helper::{Edge, Triangle};
+use crate::hull_construction::RELATIVE_TOLERANCE;
 use fxhash::{FxHashMap, FxHashSet};
 use glam::Vec3;
 use itertools::iproduct;
 use rand::prelude::StdRng;
 use rand::{RngExt, SeedableRng};
-use crate::geometry_helper::{Edge, Triangle};
-use crate::hull_construction::RELATIVE_TOLERANCE;
-use crate::TriangleIndices;
-
 
 /// The consistency check errors found.
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
@@ -16,7 +15,7 @@ pub enum ConsistencyError {
     /// The form is not closed.
     HullNotClosed,
     /// The face vertex relation does not hold.
-    EulerRelationError
+    EulerRelationError,
 }
 
 /// Runs a consistency check on the vertices and the computed convex hull. It makes sure,
@@ -34,7 +33,10 @@ pub enum ConsistencyError {
 /// let result = generate_convex_hull(&positions).expect("Input should be fine");
 /// assert_eq!(consistency_check(&positions, &result), Ok(()), "Something went wrong");
 /// ```
-pub fn consistency_check(vertices: &[Vec3], convex_hull: &[TriangleIndices]) -> Result<(), ConsistencyError> {
+pub fn consistency_check(
+    vertices: &[Vec3],
+    convex_hull: &[TriangleIndices],
+) -> Result<(), ConsistencyError> {
     // For epsilon tests we need the bounding box:
     let (min, max) = vertices
         .iter()
@@ -63,13 +65,20 @@ pub fn consistency_check(vertices: &[Vec3], convex_hull: &[TriangleIndices]) -> 
 
     // Now we check for closedness every edge must exist exactly once in itself and the reverse direction.
     let mut counts: FxHashMap<Edge, u32> = FxHashMap::default();
-    for e in &all_edges { *counts.entry(*e).or_insert(0) += 1; }
-    let closed = counts.iter().all(|(e, &c)| c == 1 && counts.get(&e.reversed()) == Some(&1));
-    if !closed { return Err(ConsistencyError::HullNotClosed); }
+    for e in &all_edges {
+        *counts.entry(*e).or_insert(0) += 1;
+    }
+    let closed = counts
+        .iter()
+        .all(|(e, &c)| c == 1 && counts.get(&e.reversed()) == Some(&1));
+    if !closed {
+        return Err(ConsistencyError::HullNotClosed);
+    }
 
     // Now we get the amount of used vertices in our hull.
-    let used_vertices = FxHashSet::from_iter(tri_list.iter().flat_map(|tri| tri.get_plain_indices())).len();
-    if tri_list.len() + 4 != 2 * used_vertices  {
+    let used_vertices =
+        FxHashSet::from_iter(tri_list.iter().flat_map(|tri| tri.get_plain_indices())).len();
+    if tri_list.len() + 4 != 2 * used_vertices {
         return Err(ConsistencyError::EulerRelationError);
     }
 
@@ -86,13 +95,13 @@ pub fn consistency_check(vertices: &[Vec3], convex_hull: &[TriangleIndices]) -> 
 /// let hull = generate_convex_hull(&cube).unwrap();
 /// let _ = consistency_check(&cube, &hull).unwrap();
 /// ```
-pub fn generate_cube(scale: f32, additional_vertices: usize, seed : u64) -> Vec<Vec3> {
+pub fn generate_cube(scale: f32, additional_vertices: usize, seed: u64) -> Vec<Vec3> {
     let mut result: Vec<Vec3> = Vec::with_capacity(additional_vertices + 27);
     let mut rng = StdRng::seed_from_u64(seed);
 
     // We add additional coplanar vertices.
-    for (x,y,z) in iproduct!(-1..=1, -1..=1, -1..=1) {
-        result.push(Vec3::new(x as f32, y as f32, z as f32 ) * scale);
+    for (x, y, z) in iproduct!(-1..=1, -1..=1, -1..=1) {
+        result.push(Vec3::new(x as f32, y as f32, z as f32) * scale);
     }
 
     let inner_scale = scale * 0.95;
@@ -118,7 +127,7 @@ pub fn generate_cube(scale: f32, additional_vertices: usize, seed : u64) -> Vec<
 /// let hull = generate_convex_hull(&sphere).unwrap();
 /// let _ = consistency_check(&sphere, &hull).unwrap();
 /// ```
-pub fn generate_sphere(scale: f32, vertices : usize, seed : u64) -> Vec<Vec3> {
+pub fn generate_sphere(scale: f32, vertices: usize, seed: u64) -> Vec<Vec3> {
     let mut rng = StdRng::seed_from_u64(seed);
     let mut result: Vec<Vec3> = Vec::with_capacity(vertices);
 
@@ -146,7 +155,7 @@ pub fn generate_sphere(scale: f32, vertices : usize, seed : u64) -> Vec<Vec3> {
 /// let hull = generate_convex_hull(&sphere).unwrap();
 /// let _ = consistency_check(&sphere, &hull).unwrap();
 /// ```
-pub fn generate_sphere_hull(scale: f32, vertices : usize, seed : u64) -> Vec<Vec3> {
+pub fn generate_sphere_hull(scale: f32, vertices: usize, seed: u64) -> Vec<Vec3> {
     let mut rng = StdRng::seed_from_u64(seed);
     let mut result: Vec<Vec3> = Vec::with_capacity(vertices);
 

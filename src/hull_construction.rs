@@ -167,24 +167,24 @@ impl<'a> HullConstructor<'a> {
             // Partition the triangles in to be deleted and remaining.
             let (mut remaining, deleted): (Vec<_>, Vec<_>) = self
                 .hull_triangles
-                .par_iter()
+                .iter()
                 .cloned()
                 .partition(|tri| tri.get_signed_distance(next_vertex) <= 0.0);
 
             // Extract the outer boundary edges of the elements that get deleted.
             let all_edges = deleted
-                .into_par_iter()
+                .iter()
                 .flat_map(|tri| tri.edges())
                 .collect::<FxHashSet<_>>();
             let boundary_edges = all_edges
-                .par_iter()
+                .iter()
                 .filter(|edge| !all_edges.contains(&edge.reversed()))
                 .collect::<Vec<_>>();
 
             // Construct the kitting triangles from the boundary to the new vertex.
             remaining.extend(
                 boundary_edges
-                    .into_iter()
+                    .iter()
                     .map(|edge| Triangle::from_edge_and_points(self.vertices, edge, next_vertex)),
             );
             self.hull_triangles = remaining;

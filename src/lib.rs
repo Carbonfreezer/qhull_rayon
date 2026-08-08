@@ -14,6 +14,7 @@ use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator};
 
 /// The Triangle with its three indices, these are the indices that have been handed over in the vector
 /// wit the vertices to compute the convex hull from.
+#[derive(Clone, Debug)]
 pub struct TriangleIndices(pub usize, pub usize, pub usize);
 
 /// All errors that can happen in the handed over.

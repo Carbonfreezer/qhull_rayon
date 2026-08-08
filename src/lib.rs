@@ -3,10 +3,11 @@
 
 mod geometry_helper;
 mod hull_construction;
+// lib.rs
+#[cfg(feature = "test-utils")]
+pub mod test_utils;
 
-use fxhash::{FxHashMap, FxHashSet};
-use crate::geometry_helper::{Edge, Triangle};
-use crate::hull_construction::{HullConstructor, RELATIVE_TOLERANCE};
+use crate::hull_construction::{HullConstructor};
 pub use glam::Vec3;
 use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator};
 
@@ -67,56 +68,3 @@ pub fn generate_convex_hull(vertices: &[Vec3]) -> Result<Vec<TriangleIndices>, C
     constructor.generate_convex_hull()
 }
 
-/// Runs a consistency check on the vertices and the computed convex hull. It makes sure,
-/// * there is no vertex outside computed convex hull.
-/// * that for every edge there is an edge in opposite direction.
-/// * For s simplex hull we must have F = 2V - 4
-/// Mainly used for test / debug purposes.
-///
-/// # Example
-/// ```
-/// use glam::Vec3;
-/// use rust_qhull::{consistency_check, generate_convex_hull};
-/// let positions = [Vec3{x:0.0, y:0.0, z:0.0}, Vec3{x:1.0, y:0.0, z:0.0}, Vec3{x:0.0, y:1.0, z:0.0}, Vec3{x:0.0, y:0.0, z:1.0}, Vec3{x:0.1, y:0.1, z:0.1}];
-/// let result = generate_convex_hull(&positions).expect("Input should be fine");
-/// assert!(consistency_check(&positions, &result), "Something went wrong");
-/// ```
-pub fn consistency_check(vertices: &[Vec3], convex_hull: &[TriangleIndices]) -> bool {
-    // For epsilon tests we need the bounding box:
-    let (min, max) = vertices
-        .iter()
-        .fold((Vec3::INFINITY, Vec3::NEG_INFINITY), |(lo, hi), v| {
-            (lo.min(*v), hi.max(*v))
-        });
-    let tolerance = (max - min).length() * RELATIVE_TOLERANCE;
-
-    let tri_list = convex_hull
-        .iter()
-        .map(|tri| Triangle::new(vertices, [tri.0, tri.1, tri.2]))
-        .collect::<Vec<_>>();
-    let all_edges = tri_list
-        .iter()
-        .flat_map(|tri| tri.edges())
-        .collect::<Vec<_>>();
-
-    // Convexity check.
-    for vert in 0..vertices.len() {
-        for tri in &tri_list {
-            if tri.get_signed_distance(vert) > tolerance {
-                return false;
-            }
-        }
-    }
-
-    // Now we check for closedness every edge must exist exactly once in itself and the reverse direction.
-    let mut counts: FxHashMap<Edge, u32> = FxHashMap::default();
-    for e in &all_edges { *counts.entry(*e).or_insert(0) += 1; }
-    let closed = counts.iter().all(|(e, &c)| c == 1 && counts.get(&e.reversed()) == Some(&1));
-    if !closed { return false; }
-
-    // Now we get the amount of used vertices in our hull.
-    let used_vertices = FxHashSet::from_iter(tri_list.iter().flat_map(|tri| tri.get_plain_indices())).iter().count();
-    if 2 * tri_list.len() - 4 !=   used_vertices { return false; }
-
-    true
-}

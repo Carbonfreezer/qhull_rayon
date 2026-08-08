@@ -5,7 +5,7 @@
 ## Overview
 
 This is a rayon parallelized version of the [q-hull](https://en.wikipedia.org/wiki/Quickhull) algorithm in 3D. For
-vertices it uses the [glam library]((https://docs.rs/glam/latest/glam/)) and works on `f32`. This algorithm is optimized
+vertices it uses the [glam library](https://docs.rs/glam/latest/glam/) and works on `f32`. This algorithm is optimized
 for culling so it works best with geometries that have a lot of inner vertices like you may get for collision proxies.
 
 ## Basic usage example

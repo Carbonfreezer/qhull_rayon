@@ -4,6 +4,8 @@
 //! performance wise, when you can expect many inner vertices that do not belong to the hull, what
 //! is the standard use case for collision geometry.
 
+#![warn(missing_docs)]
+
 mod geometry_helper;
 mod hull_construction;
 // lib.rs
@@ -31,11 +33,17 @@ impl TriangleIndices {
 #[non_exhaustive]
 pub enum ConvexHullError {
     /// Fewer than four vertices were supplied.
-    TooFewVertices { count: usize },
+    TooFewVertices { 
+        /// The amount of vertices found.
+        count: usize 
+    },
     /// All vertices lie in a common plane (or on a line/point).
     DegenerateInput,
     /// A vertex contains a non-finite coordinate.
-    NonFiniteVertex { index: usize },
+    NonFiniteVertex { 
+        /// The index of the vertex, that was not finite.
+        index: usize 
+    },
 }
 
 impl std::fmt::Display for ConvexHullError {

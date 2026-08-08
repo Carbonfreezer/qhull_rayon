@@ -17,7 +17,7 @@ test-utils = ["dep:itertools", "dep:rand"]
 qhull_rayon = { path = ".", features = ["test-utils"] }
 proptest = "1.11.0"
 criterion = { version = "0.8.2", features = ["html_reports"] }
-
+tobj = "4.0.5"
 
 [[bench]]
 name = "hull_bench"

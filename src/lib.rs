@@ -5,6 +5,7 @@ mod geometry_helper;
 
 use crate::geometry_helper::Triangle;
 use fxhash::FxHashSet;
+use glam::Mat3;
 pub use glam::Vec3;
 use rayon::prelude::{
     IndexedParallelIterator, IntoParallelIterator, IntoParallelRefIterator, ParallelIterator,
@@ -14,18 +15,33 @@ use rayon::prelude::{
 /// wit the vertices to compute the convex hull from.
 pub struct TriangleIndices(pub usize, pub usize, pub usize);
 
-/// The error that can occur if too few vertices have been handed over to compute a convex hull.
-/// it should be minimally 4 in general position.
+/// All errors that can happen in the handed over.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct TooFewVerticesError;
+#[non_exhaustive]
+pub enum ConvexHullError {
+    /// Fewer than four vertices were supplied.
+    TooFewVertices { count: usize },
+    /// All vertices lie in a common plane (or on a line/point).
+    DegenerateInput,
+    /// A vertex contains a non-finite coordinate.
+    NonFiniteVertex { index: usize },
+}
 
-impl std::fmt::Display for TooFewVerticesError {
+impl std::fmt::Display for ConvexHullError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "at least four non-coplanar vertices are required")
+        match self {
+            ConvexHullError::TooFewVertices { count } => {
+                write!(f, "Too few vertices: {}", count)
+            }
+            ConvexHullError::DegenerateInput => write!(f, "All vertices are coplanar"),
+            ConvexHullError::NonFiniteVertex { index } => {
+                write!(f, "Non finite vertex: {}", index)
+            }
+        }
     }
 }
 
-impl std::error::Error for TooFewVerticesError {}
+impl std::error::Error for ConvexHullError {}
 
 struct HullConstructor<'a> {
     /// The vertices we still need to process.
@@ -48,48 +64,42 @@ impl<'a> HullConstructor<'a> {
     }
 
     /// Gets the best index pair as index into the inner vector and the vertex position.
-    fn get_best_index(
-        &self,
-        probe_function: impl Fn(usize) -> f32 + Sync,
-    ) -> Option<(usize, usize)> {
+    fn get_best_index(&self, probe_function: impl Fn(usize) -> f32 + Sync) -> (usize, usize) {
         let (inner_index, result, _) = self
             .indices_to_process
             .par_iter()
             .enumerate()
             .map(|(field_ind, vert_ind)| (field_ind, vert_ind, probe_function(*vert_ind)))
-            .max_by(|(_, _, val_a), (_, _, val_b)| val_a.total_cmp(val_b))?;
-        Some((inner_index, *result))
+            .max_by(|(_, _, val_a), (_, _, val_b)| val_a.total_cmp(val_b))
+            .expect("There should be at least one vertex left");
+        (inner_index, *result)
     }
     /// Applies the probe_function to all vertices and finds the element with the highest value,
     /// the index of that vertex is returned and eliminated from the processing list.
-    fn get_best_index_and_remove(
-        &mut self,
-        probe_function: impl Fn(usize) -> f32 + Sync,
-    ) -> Option<usize> {
-        let (inner_index, result) = self.get_best_index(probe_function)?;
+    fn get_best_index_and_remove(&mut self, probe_function: impl Fn(usize) -> f32 + Sync) -> usize {
+        let (inner_index, result) = self.get_best_index(probe_function);
         self.indices_to_process.swap_remove(inner_index);
-        Some(result)
+        result
     }
 
     /// Builds an initial tetrahedron from the inner vertices.
-    fn build_initial_tetrahedron(&mut self) -> Result<(), TooFewVerticesError> {
+    fn build_initial_tetrahedron(&mut self) -> Result<(), ConvexHullError> {
         debug_assert!(
             self.hull_triangles.is_empty(),
             "The initial tetrahedron must be empty."
         );
 
-        let i0 = self
-            .get_best_index_and_remove(|i| self.vertices[i].x)
-            .ok_or(TooFewVerticesError)?;
-        let i1 = self
-            .get_best_index_and_remove(|i| self.vertices[i].y)
-            .ok_or(TooFewVerticesError)?;
-        let i2 = self
-            .get_best_index_and_remove(|i| self.vertices[i].z)
-            .ok_or(TooFewVerticesError)?;
-        let i3 = self
-            .get_best_index_and_remove(|i| -self.vertices[i].z)
-            .ok_or(TooFewVerticesError)?;
+        let i0 = self.get_best_index_and_remove(|i| self.vertices[i].x);
+        let i1 = self.get_best_index_and_remove(|i| self.vertices[i].y);
+        let i2 = self.get_best_index_and_remove(|i| self.vertices[i].z);
+        let i3 = self.get_best_index_and_remove(|i| -self.vertices[i].z);
+
+        // Now we have to check for degeneration.
+        let matrix = Mat3::from_cols(self.vertices[i3] - self.vertices[i0],
+                                     self.vertices[i2] - self.vertices[i0],
+                                     self.vertices[i1] - self.vertices[i0]);
+        if matrix.determinant() < f32::EPSILON {return Err(ConvexHullError::DegenerateInput)}
+
 
         let mut triangles = vec![
             Triangle::new(self.vertices, [i0, i1, i2]),
@@ -97,6 +107,7 @@ impl<'a> HullConstructor<'a> {
             Triangle::new(self.vertices, [i2, i1, i3]),
             Triangle::new(self.vertices, [i3, i0, i2]),
         ];
+
 
         if triangles[0].get_signed_distance(i3) > 0.0 {
             triangles = triangles
@@ -120,7 +131,7 @@ impl<'a> HullConstructor<'a> {
                 self.hull_triangles
                     .iter()
                     .map(|tri| tri.get_signed_distance(*i))
-                    .fold(f32::NEG_INFINITY ,f32::max)
+                    .fold(f32::NEG_INFINITY, f32::max)
             })
             .collect::<Vec<_>>();
         // Get the position with the max value.
@@ -129,10 +140,17 @@ impl<'a> HullConstructor<'a> {
             .enumerate()
             .max_by(|a, b| a.1.total_cmp(b.1))
             .expect("indices_to_process is non-empty per loop condition");
-        debug_assert!(*highest_value >= 0.0, "There should be at least one outer vertex left");
+        debug_assert!(
+            *highest_value >= 0.0,
+            "There should be at least one outer vertex left"
+        );
         let next_vertex = self.indices_to_process[best_position];
         // Filter out the all vertices we do not need any more.
-        debug_assert_eq!(self.indices_to_process.len(), highest_signed_distance.len(), "The two vectors should be of same length");
+        debug_assert_eq!(
+            self.indices_to_process.len(),
+            highest_signed_distance.len(),
+            "The two vectors should be of same length"
+        );
         self.indices_to_process = self
             .indices_to_process
             .par_iter()
@@ -143,7 +161,7 @@ impl<'a> HullConstructor<'a> {
         next_vertex
     }
 
-    fn generate_convex_hull(&mut self) -> Result<(), TooFewVerticesError> {
+    fn generate_convex_hull(&mut self) -> Result<(), ConvexHullError> {
         self.build_initial_tetrahedron()?;
         while !self.indices_to_process.is_empty() {
             // Get the index the furthest away and remove all inner vertices along the way.
@@ -180,10 +198,17 @@ impl<'a> HullConstructor<'a> {
 }
 
 /// Generates the convex hull from a list of positions handed over. From the positions triangles are returned
-/// with the indices given in counter clockwise order seen from the outside
-pub fn generate_convex_hull(
-    vertices: &[Vec3],
-) -> Result<Vec<TriangleIndices>, TooFewVerticesError> {
+/// with the indices given in counterclockwise order seen from the outside.
+pub fn generate_convex_hull(vertices: &[Vec3]) -> Result<Vec<TriangleIndices>, ConvexHullError> {
+    if vertices.len() < 4 {
+        return Err(ConvexHullError::TooFewVertices {
+            count: vertices.len(),
+        });
+    }
+    if let Some(index) = vertices.par_iter().position_any(|v| !v.is_finite()) {
+        return Err(ConvexHullError::NonFiniteVertex { index });
+    }
+
     let mut constructor = HullConstructor::new(vertices);
     constructor.generate_convex_hull()?;
     Ok(constructor

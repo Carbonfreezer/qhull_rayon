@@ -5,7 +5,6 @@ mod geometry_helper;
 
 use crate::geometry_helper::Triangle;
 use fxhash::FxHashSet;
-use glam::Mat3;
 pub use glam::Vec3;
 use rayon::prelude::{
     IndexedParallelIterator, IntoParallelIterator, IntoParallelRefIterator, ParallelIterator,
@@ -50,6 +49,8 @@ struct HullConstructor<'a> {
     hull_triangles: Vec<Triangle<'a>>,
     /// The list with the indices into the vertices that still have to be processed.
     indices_to_process: Vec<usize>,
+    /// The scale we use for tolerance checks.
+    scale : f32,
 }
 
 impl<'a> HullConstructor<'a> {
@@ -60,6 +61,7 @@ impl<'a> HullConstructor<'a> {
             vertices,
             indices_to_process,
             hull_triangles: Vec::new(),
+            scale: 1.0,
         }
     }
 
@@ -89,16 +91,37 @@ impl<'a> HullConstructor<'a> {
             "The initial tetrahedron must be empty."
         );
 
-        let i0 = self.get_best_index_and_remove(|i| self.vertices[i].x);
-        let i1 = self.get_best_index_and_remove(|i| self.vertices[i].y);
-        let i2 = self.get_best_index_and_remove(|i| self.vertices[i].z);
-        let i3 = self.get_best_index_and_remove(|i| -self.vertices[i].z);
+        // The first vertex is the one furthest out.
+        let i0 = self.get_best_index_and_remove(|i| self.vertices[i].length());
+        let pos0 = self.vertices[i0];
+        // The second vertex is the one furthest away from first.
+        let i1 = self.get_best_index_and_remove(|i| (self.vertices[i] - pos0).length());
+        let pos1 = self.vertices[i1];
+        let a = pos1 - pos0;
+        let dir_a = a.normalize();
+        // The third vertex is the one furthest away from the edge.
+        let i2 = self.get_best_index_and_remove(|i| {
+            let point_on_line = pos0 + (self.vertices[i] - pos0).dot(dir_a) * dir_a;
+            (self.vertices[i] - point_on_line).length()
+        });
+        let pos2 = self.vertices[i2];
+        let b = pos2 - pos0;
+        // Gram Schmidt step.
+        let dir_b = (b - b.dot(dir_a) * dir_a).normalize();
+        // The fourth and last point is the point the furthest away from the constructed plane.
+        let i3 = self.get_best_index_and_remove(|i| {
+            let delta = self.vertices[i] - pos0;
+            let point_on_plane = pos0 + delta.dot(dir_a) * dir_a + delta.dot(dir_b) * dir_b;
+            (self.vertices[i] - point_on_plane).length()
+        });
+        let pos3 = self.vertices[i3];
+        let c = pos3 - pos0;
 
         // Now we have to check for degeneration.
-        let matrix = Mat3::from_cols(self.vertices[i3] - self.vertices[i0],
-                                     self.vertices[i2] - self.vertices[i0],
-                                     self.vertices[i1] - self.vertices[i0]);
-        if matrix.determinant() < f32::EPSILON {return Err(ConvexHullError::DegenerateInput)}
+        self.scale = a.length() * b.length() * c.length();
+        if self.scale <= 0.0 || (a.cross(b).dot(c).abs() / self.scale) < 1e-6 {
+            return Err(ConvexHullError::DegenerateInput);
+        }
 
 
         let mut triangles = vec![
@@ -155,7 +178,7 @@ impl<'a> HullConstructor<'a> {
             .indices_to_process
             .par_iter()
             .zip(highest_signed_distance.into_par_iter())
-            .filter_map(|(&i, dist)| (i != next_vertex && dist > f32::EPSILON).then_some(i))
+            .filter_map(|(&i, dist)| (i != next_vertex && dist / self.scale > f32::EPSILON).then_some(i))
             .collect();
 
         next_vertex

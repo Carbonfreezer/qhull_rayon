@@ -73,7 +73,7 @@ pub fn consistency_check(vertices: &[Vec3], convex_hull: &[TriangleIndices]) -> 
 
     // Now we get the amount of used vertices in our hull.
     let used_vertices = FxHashSet::from_iter(tri_list.iter().flat_map(|tri| tri.get_plain_indices())).len();
-    if tri_list.len() != 2 * used_vertices - 4 {
+    if tri_list.len() + 4 != 2 * used_vertices  {
         return Err(ConsistencyError::EulerRelationError);
     }
 
@@ -132,8 +132,8 @@ pub fn generate_sphere(scale: f32, vertices : usize) -> Vec<Vec3> {
         let y = rng.random_range(-1.0..=1.0);
         let z = rng.random_range(-1.0..=1.0);
 
-        let direction = Vec3::new(x, y, z).normalize();
-        let radius = rng.random_range(0.0f32..1.0).cbrt() * scale;
+        let direction = Vec3::new(x, y, z).normalize_or_zero();
+        let radius = rng.random_range(0.0f32..=1.0).cbrt() * scale;
         result.push(direction * radius);
     }
 

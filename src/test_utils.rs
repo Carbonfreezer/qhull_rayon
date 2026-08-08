@@ -134,3 +134,30 @@ pub fn generate_sphere(scale: f32, vertices : usize, seed : u64) -> Vec<Vec3> {
 
     result
 }
+
+/// Generates a random hollow sphere used fdr testing and profiling
+/// Worsed case assumption for this algorithm.
+///
+/// # Example
+/// ```
+/// use qhull_rayon::generate_convex_hull;
+/// use qhull_rayon::test_utils::{consistency_check, generate_sphere_hull};
+/// let sphere = generate_sphere_hull(100.0, 1_000, 42);
+/// let hull = generate_convex_hull(&sphere).unwrap();
+/// let _ = consistency_check(&sphere, &hull).unwrap();
+/// ```
+pub fn generate_sphere_hull(scale: f32, vertices : usize, seed : u64) -> Vec<Vec3> {
+    let mut rng = StdRng::seed_from_u64(seed);
+    let mut result: Vec<Vec3> = Vec::with_capacity(vertices);
+
+    for _ in 0..vertices {
+        let x = rng.random_range(-1.0..=1.0);
+        let y = rng.random_range(-1.0..=1.0);
+        let z = rng.random_range(-1.0..=1.0);
+
+        let direction = Vec3::new(x, y, z).normalize_or_zero();
+        result.push(direction * scale);
+    }
+
+    result
+}

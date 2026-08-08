@@ -43,6 +43,15 @@ impl std::error::Error for ConvexHullError {}
 
 /// Generates the convex hull from a list of positions handed over. From the positions triangles are returned
 /// with the indices given in counterclockwise order seen from the outside.
+/// 
+/// # Example
+/// ```
+/// use glam::Vec3;
+/// use rust_qhull::generate_convex_hull;
+/// let positions = [Vec3{x:0.0, y:0.0, z:0.0}, Vec3{x:1.0, y:0.0, z:0.0}, Vec3{x:0.0, y:1.0, z:0.0}, Vec3{x:0.0, y:0.0, z:1.0}, Vec3{x:0.1, y:0.1, z:0.1}];
+/// let result = generate_convex_hull(&positions).expect("Input should be fine");
+/// assert_eq!(result.len(), 4, "We should get the four triangles of the outer tetrahedron");
+/// ```
 pub fn generate_convex_hull(vertices: &[Vec3]) -> Result<Vec<TriangleIndices>, ConvexHullError> {
     if vertices.len() < 4 {
         return Err(ConvexHullError::TooFewVertices {

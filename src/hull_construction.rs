@@ -114,8 +114,8 @@ impl<'a> HullConstructor<'a> {
     }
 
     /// Analyzes the existing vertices and finds the index that is furthest away from the existing hull
-    /// and removes all vertices that are inside the hull.
-    fn get_best_vertex_index_and_sweep(&mut self) -> usize {
+    /// and removes all vertices that are inside the hull. If there is no outer vertex left it returns None.
+    fn get_best_vertex_index_and_sweep(&mut self) -> Option<usize> {
         // Get highest signed distance for every vertex.
         let highest_signed_distance = self
             .indices_to_process
@@ -133,10 +133,13 @@ impl<'a> HullConstructor<'a> {
             .enumerate()
             .max_by(|a, b| a.1.total_cmp(b.1))
             .expect("indices_to_process is non-empty per loop condition");
-        debug_assert!(
-            *highest_value >= 0.0,
-            "There should be at least one outer vertex left"
-        );
+        
+        // In this case we have only inner points left.
+        if *highest_value <= self.tolerance {
+            self.indices_to_process.clear();
+            return None;
+        }
+        
         let next_vertex = self.indices_to_process[best_position];
         // Filter out the all vertices we do not need any more.
         debug_assert_eq!(
@@ -151,7 +154,7 @@ impl<'a> HullConstructor<'a> {
             .filter_map(|(&i, dist)| (i != next_vertex && dist  > self.tolerance).then_some(i))
             .collect();
 
-        next_vertex
+        Some(next_vertex)
     }
 
     /// The inner call to generate a convex hull.
@@ -159,7 +162,7 @@ impl<'a> HullConstructor<'a> {
         self.build_initial_tetrahedron()?;
         while !self.indices_to_process.is_empty() {
             // Get the index the furthest away and remove all inner vertices along the way.
-            let next_vertex = self.get_best_vertex_index_and_sweep();
+            let Some(next_vertex) = self.get_best_vertex_index_and_sweep() else {break;};
 
             // Partition the triangles in to be deleted and remaining.
             let (mut remaining, deleted): (Vec<_>, Vec<_>) = self

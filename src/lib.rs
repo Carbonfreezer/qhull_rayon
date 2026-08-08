@@ -1,5 +1,6 @@
 //! This library contains an implementation of the q hull algorithm using glam for vector algebra and
-//! rayon for parallelization. Contains the qhull from wikipedia:  <https://en.wikipedia.org/wiki/Quickhull>
+//! rayon for parallelization. Uses an adaptation  [q-hull](https://en.wikipedia.org/wiki/Quickhull) for three dimensions.
+//! For vector representation we use the [glam library](https://docs.rs/glam/latest/glam/)
 
 mod geometry_helper;
 mod hull_construction;

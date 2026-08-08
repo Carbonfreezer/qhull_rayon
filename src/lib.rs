@@ -95,33 +95,35 @@ impl<'a> HullConstructor<'a> {
         let i0 = self.get_best_index_and_remove(|i| self.vertices[i].length());
         let pos0 = self.vertices[i0];
         // The second vertex is the one furthest away from first.
-        let i1 = self.get_best_index_and_remove(|i| (self.vertices[i] - pos0).length());
+        let i1 = self.get_best_index_and_remove(|i| (self.vertices[i] - pos0).length_squared());
         let pos1 = self.vertices[i1];
         let a = pos1 - pos0;
         let dir_a = a.normalize();
         // The third vertex is the one furthest away from the edge.
         let i2 = self.get_best_index_and_remove(|i| {
             let point_on_line = pos0 + (self.vertices[i] - pos0).dot(dir_a) * dir_a;
-            (self.vertices[i] - point_on_line).length()
+            (self.vertices[i] - point_on_line).length_squared()
         });
         let pos2 = self.vertices[i2];
         let b = pos2 - pos0;
         // Gram Schmidt step.
-        let dir_b = (b - b.dot(dir_a) * dir_a).normalize();
+        let dir_b = (b - b.dot(dir_a) * dir_a).normalize_or_zero();
         // The fourth and last point is the point the furthest away from the constructed plane.
         let i3 = self.get_best_index_and_remove(|i| {
             let delta = self.vertices[i] - pos0;
             let point_on_plane = pos0 + delta.dot(dir_a) * dir_a + delta.dot(dir_b) * dir_b;
-            (self.vertices[i] - point_on_plane).length()
+            (self.vertices[i] - point_on_plane).length_squared()
         });
         let pos3 = self.vertices[i3];
         let c = pos3 - pos0;
 
-        // Now we have to check for degeneration.
-        self.scale = a.length() * b.length() * c.length();
-        if self.scale <= 0.0 || (a.cross(b).dot(c).abs() / self.scale) < 1e-6 {
+        // Let us check for degeneration
+        let volume_scale = a.length() * b.length() * c.length();
+        if volume_scale <= 0.0 || (a.cross(b).dot(c).abs() / volume_scale) < 1e-6 {
             return Err(ConvexHullError::DegenerateInput);
         }
+        // Field gets a linear scale.
+        self.scale = a.length();
 
 
         let mut triangles = vec![
@@ -178,7 +180,7 @@ impl<'a> HullConstructor<'a> {
             .indices_to_process
             .par_iter()
             .zip(highest_signed_distance.into_par_iter())
-            .filter_map(|(&i, dist)| (i != next_vertex && dist / self.scale > f32::EPSILON).then_some(i))
+            .filter_map(|(&i, dist)| (i != next_vertex && dist  > f32::EPSILON *  self.scale).then_some(i))
             .collect();
 
         next_vertex

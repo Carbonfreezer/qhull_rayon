@@ -33,7 +33,7 @@ pub(crate) struct Triangle<'a> {
 }
 
 impl<'a> Triangle<'a> {
-    /// Creates a new triangle from three indices handed over indices must be given in CCW order.
+    /// Creates a new triangle from three indices; the indices must be given in CCW order.
     pub(crate) fn new(base_vertices: &'a [Vec3], indices: [usize; 3]) -> Self {
         let base_point = base_vertices[indices[0]];
         Self {

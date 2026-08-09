@@ -4,9 +4,9 @@
 ![Built with](https://img.shields.io/badge/built%20with-Rust%20-orange)
 ## Overview
 
-This is a rayon parallelized version of the [q-hull](https://en.wikipedia.org/wiki/Quickhull) algorithm in 3D. For
-vertices it uses the [glam library](https://docs.rs/glam/latest/glam/) and works on `f32`. This algorithm is optimized
-for culling so it works best with geometries that have a lot of inner vertices like you may get for collision proxies.
+This is a Rayon-parallelized version of the [q-hull](https://en.wikipedia.org/wiki/Quickhull) algorithm in 3D. For
+vertices, it uses the [glam library](https://docs.rs/glam/latest/glam/) and works on `f32`. This algorithm is optimized
+for culling, so it works best with geometries that have a lot of inner vertices, as you may get for collision proxies.
 
 ## Basic usage example
 
@@ -20,7 +20,7 @@ let result = generate_convex_hull( & positions).expect("Input should be fine");
 assert_eq!(result.len(), 4, "We should get the four triangles of the outer tetrahedron");
 ```
 
-the entry in `cargo.toml` can be done in two ways the standard way. 
+The entry in `cargo.toml` can be done in two ways: the standard way. 
 
 ```cargo.toml
 [dependencies]
@@ -58,12 +58,12 @@ points. The time used on a computer with an AMD Ryzen 9 9950X3D2 was
 | 100_000  | 780.6     |
 
 
-The computations distributions are shown here:
+The computation distributions are shown here:
 
 ![sphere full line](https://raw.githubusercontent.com/Carbonfreezer/qhull_rayon/main/performance_shots/sphere_full_lines.png).
 
-The second one is a box that naturally has a much simpler convex hull with the option to cut in with culling a lot more
-aggressively. In this experiment the same amount of vertices were used. The timing table is:
+The second one is a box that naturally has a much simpler convex hull with the option to cut in by culling a lot more
+aggressively. In this experiment, the same number of vertices was used. The timing table is:
 
 | vertices | time (ms) |
 |----------|-----------|
@@ -74,13 +74,13 @@ aggressively. In this experiment the same amount of vertices were used. The timi
 | 100_000  | 6.9       |
 
 
-The corresponding line plot displayed here:
+The corresponding line plot is displayed here:
 
 ![box lines](https://raw.githubusercontent.com/Carbonfreezer/qhull_rayon/main/performance_shots/box_lines.png).
 
-The achilles heel of this algorithms is a point cloud where all points belong to the convex hull. In this case there are
+The Achilles' heel of this algorithm is a point cloud in which all points lie on the convex hull. In this case, there are
 faster implementations that track the correspondence between faces and vertices and rely less on culling. To demonstrate
-this effect we use a data set, that contains vertices, that all reside on a sphere surface. Here we restrict ourselves
+this effect, we use a data set that contains vertices that all reside on a sphere surface. Here we restrict ourselves
 to vertex amounts of 100, 1_000, 1_500 and 2_000 vertices. The timing result is shown in this table:
 
 | vertices | time (ms) |
@@ -100,7 +100,7 @@ The efficiency of the algorithm hinges clearly on its culling ability.
 The project also contains an extensive test suite making use of property tests
 > `cargo test`
 
-A documentation can be generated with
+Documentation can be generated with
 > `cargo doc --open`
 
 if you want to include the documentation for the test utilities

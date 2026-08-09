@@ -1,4 +1,4 @@
-//! This module contains a series of methods that are mean for profiling and testing.
+//! This module contains a series of methods that are meant for profiling and testing.
 //! They fall into the category of generating vertices to generate convex hulls from and for
 //! making consistency checks on computed convex hulls.
 
@@ -26,9 +26,9 @@ pub enum ConsistencyError {
 }
 
 /// Runs a consistency check on the vertices and the computed convex hull. It makes sure,
-/// * there is no vertex outside computed convex hull.
-/// * that for every edge there is an edge in opposite direction.
-/// * For s simplex hull we must have F = 2V - 4
+/// * there is no vertex outside the computed convex hull.
+/// * that for every edge there is an edge in the opposite direction.
+/// * For a simplex hull, we must have F = 2V - 4
 ///
 /// Mainly used for test / debug purposes.
 ///

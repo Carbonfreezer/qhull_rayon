@@ -1,7 +1,7 @@
-//! This library contains an implementation of the q hull algorithm using glam for vector algebra and
-//! rayon for parallelization. Uses an adaptation  [q-hull](https://en.wikipedia.org/wiki/Quickhull) for three dimensions.
-//! For vector representation we use the [glam library](https://docs.rs/glam/latest/glam/). This library shines
-//! performance wise, when you can expect many inner vertices that do not belong to the hull, what
+//! This library contains an implementation of the q-hull algorithm using glam for vector algebra and
+//! rayon for parallelization. Uses an adaptation of [q-hull](https://en.wikipedia.org/wiki/Quickhull) for three dimensions.
+//! For vector representation, we use the [glam library](https://docs.rs/glam/latest/glam/). This library shines
+//! performance-wise, when you can expect many inner vertices that do not belong to the hull, which
 //! is the standard use case for collision geometry.
 
 #![warn(missing_docs)]
@@ -16,8 +16,8 @@ use crate::hull_construction::HullConstructor;
 pub use glam::Vec3;
 use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator};
 
-/// The Triangle with its three indices, these are the indices that have been handed over in the vector
-/// wit the vertices to compute the convex hull from.
+/// The Triangle with its three indices; these are the indices that have been handed over in the vector
+/// with the vertices to compute the convex hull from.
 #[derive(Clone, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
 pub struct TriangleIndices(pub usize, pub usize, pub usize);
 
@@ -28,20 +28,20 @@ impl TriangleIndices {
     }
 }
 
-/// All errors that can happen in the handed over.
+/// All errors that can happen in the handover.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[non_exhaustive]
 pub enum ConvexHullError {
     /// Fewer than four vertices were supplied.
     TooFewVertices { 
-        /// The amount of vertices found.
+        /// The number of vertices found.
         count: usize 
     },
     /// All vertices lie in a common plane (or on a line/point).
     DegenerateInput,
     /// A vertex contains a non-finite coordinate.
     NonFiniteVertex { 
-        /// The index of the vertex, that was not finite.
+        /// The index of the vertex that was not finite.
         index: usize 
     },
 }
@@ -62,7 +62,7 @@ impl std::fmt::Display for ConvexHullError {
 
 impl std::error::Error for ConvexHullError {}
 
-/// Generates the convex hull from a list of positions handed over. From the positions triangles are returned
+/// Generates the convex hull from a list of positions handed over. From the positions, triangles are returned
 /// with the indices given in counterclockwise order seen from the outside.
 ///
 /// # Example

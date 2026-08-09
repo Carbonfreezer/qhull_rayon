@@ -34,7 +34,7 @@ impl<'a> HullConstructor<'a> {
         }
     }
 
-    /// Gets the best index pair as index into the inner vector and the vertex position.
+    /// Gets the best index pair as an index into the inner vector and the vertex position.
     fn get_best_index(&self, probe_function: impl Fn(usize) -> f32 + Sync) -> (usize, usize) {
         let (inner_index, result, _) = self
             .indices_to_process
@@ -113,7 +113,7 @@ impl<'a> HullConstructor<'a> {
     }
 
     /// Analyzes the existing vertices and finds the index that is furthest away from the existing hull
-    /// and removes all vertices that are inside the hull. If there is no outer vertex left it returns None.
+    /// and removes all vertices that are inside the hull. If there is no outer vertex left, it returns None.
     fn get_best_vertex_index_and_sweep(&mut self) -> Option<usize> {
         // Get highest signed distance for every vertex.
         let highest_signed_distance = self

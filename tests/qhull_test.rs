@@ -1,4 +1,4 @@
-//! Test for te qhull library.
+//! Test for the qhull library.
 use proptest::prelude::*;
 use qhull_rayon::test_utils::*;
 use qhull_rayon::*;

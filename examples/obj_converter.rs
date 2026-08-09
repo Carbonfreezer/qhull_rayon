@@ -1,4 +1,4 @@
-//! This is a test sample that converts two obj files. It reads one, generates the convex hull of the geometry and saves it as a new filo.
+//! This is a test sample that converts two OBJ files. It reads one, generates the convex hull of the geometry, and saves it as a new file.
 
 use fxhash::FxHashMap;
 use glam::Vec3;

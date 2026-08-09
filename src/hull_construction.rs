@@ -9,7 +9,7 @@ use rayon::prelude::{
 };
 use std::mem::take;
 
-pub const RELATIVE_TOLERANCE: f32 = 1e-6;
+pub const RELATIVE_TOLERANCE: f32 = 1e-5;
 
 pub(crate) struct HullConstructor<'a> {
     /// The vertices we still need to process.

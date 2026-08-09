@@ -16,8 +16,8 @@ use crate::hull_construction::HullConstructor;
 pub use glam::Vec3;
 use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator};
 
-/// The Triangle with its three indices; these are the indices that have been handed over in the vector
-/// with the vertices to compute the convex hull from.
+/// The Triangle with its three indices; these are the indices that refer to the vector that has been
+/// handed over. The triangles are generated in CCW order seen from the outside.
 #[derive(Clone, Debug, Eq, Hash, PartialEq, PartialOrd, Ord)]
 pub struct TriangleIndices(pub usize, pub usize, pub usize);
 
@@ -64,6 +64,11 @@ impl std::error::Error for ConvexHullError {}
 
 /// Generates the convex hull from a list of positions handed over. From the positions, triangles are returned
 /// with the indices given in counterclockwise order seen from the outside.
+/// 
+/// This function returns an error in the following cases
+/// 1. There are less than 4 vertices handed over.
+/// 2. One of the vertices as an infinite or a NaN component.
+/// 3. The vertices handed over are coplanar, colinear or the same. 
 ///
 /// # Example
 /// ```

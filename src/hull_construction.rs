@@ -11,14 +11,18 @@ use std::mem::take;
 
 const RELATIVE_TOLERANCE: f32 = 1e-5;
 
-
 /// Computes the numerical tolerance based on the bounding box diagonal
 pub(crate) fn compute_tolerance_value(vertices: &[Vec3]) -> f32 {
     let (min, max) = vertices
-        .iter()
-        .fold((Vec3::INFINITY, Vec3::NEG_INFINITY), |(lo, hi), v| {
-            (lo.min(*v), hi.max(*v))
-        });
+        .par_iter()
+        .fold(
+            || (Vec3::INFINITY, Vec3::NEG_INFINITY),
+            |(lo, hi), v| (lo.min(*v), hi.max(*v)),
+        )
+        .reduce(
+            || (Vec3::INFINITY, Vec3::NEG_INFINITY),
+            |(min_a, max_a), (min_b, max_b)| (min_a.min(min_b), max_a.max(max_b)),
+        );
     (max - min).length() * RELATIVE_TOLERANCE
 }
 

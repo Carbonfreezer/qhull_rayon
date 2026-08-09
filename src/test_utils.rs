@@ -4,7 +4,7 @@
 
 use crate::TriangleIndices;
 use crate::geometry_helper::{Edge, Triangle};
-use crate::hull_construction::RELATIVE_TOLERANCE;
+use crate::hull_construction::{compute_tolerance_value};
 use fxhash::{FxHashMap, FxHashSet};
 use glam::Vec3;
 use itertools::iproduct;
@@ -46,12 +46,7 @@ pub fn consistency_check(
     convex_hull: &[TriangleIndices],
 ) -> Result<(), ConsistencyError> {
     // For epsilon tests we need the bounding box:
-    let (min, max) = vertices
-        .iter()
-        .fold((Vec3::INFINITY, Vec3::NEG_INFINITY), |(lo, hi), v| {
-            (lo.min(*v), hi.max(*v))
-        });
-    let tolerance = (max - min).length() * RELATIVE_TOLERANCE;
+    let tolerance = compute_tolerance_value(vertices);
 
     let tri_list = convex_hull
         .iter()

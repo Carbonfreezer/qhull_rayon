@@ -9,7 +9,18 @@ use rayon::prelude::{
 };
 use std::mem::take;
 
-pub const RELATIVE_TOLERANCE: f32 = 1e-5;
+const RELATIVE_TOLERANCE: f32 = 1e-5;
+
+
+/// Computes the numerical tolerance based on the bounding box diagonal
+pub(crate) fn compute_tolerance_value(vertices: &[Vec3]) -> f32 {
+    let (min, max) = vertices
+        .iter()
+        .fold((Vec3::INFINITY, Vec3::NEG_INFINITY), |(lo, hi), v| {
+            (lo.min(*v), hi.max(*v))
+        });
+    (max - min).length() * RELATIVE_TOLERANCE
+}
 
 pub(crate) struct HullConstructor<'a> {
     /// The vertices we still need to process.
@@ -60,6 +71,9 @@ impl<'a> HullConstructor<'a> {
             "The initial tetrahedron must be empty."
         );
 
+        // Field gets a linear scale.
+        self.tolerance = compute_tolerance_value(self.vertices);
+
         // The first vertex is the one furthest out in x
         let i0 = self.get_best_index_and_remove(|i| self.vertices[i].x);
         let pos0 = self.vertices[i0];
@@ -91,8 +105,6 @@ impl<'a> HullConstructor<'a> {
         if volume_scale <= 0.0 || (a.cross(b).dot(c).abs() / volume_scale) < 1e-6 {
             return Err(ConvexHullError::DegenerateInput);
         }
-        // Field gets a linear scale.
-        self.tolerance = RELATIVE_TOLERANCE * a.length();
 
         let mut triangles = vec![
             Triangle::new(self.vertices, [i0, i1, i2]),

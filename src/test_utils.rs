@@ -15,7 +15,10 @@ use rand::{RngExt, SeedableRng};
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 pub enum ConsistencyError {
     /// There is a point outside the convex hull.
-    PointOutsideConvexHull(usize),
+    PointOutsideConvexHull(
+        /// The index of the point outside the hull.
+        usize
+    ),
     /// The form is not closed.
     HullNotClosed,
     /// The face vertex relation does not hold.

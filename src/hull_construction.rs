@@ -85,7 +85,7 @@ impl<'a> HullConstructor<'a> {
         let i1 = self.get_best_index_and_remove(|i| (self.vertices[i] - pos0).length_squared());
         let pos1 = self.vertices[i1];
         let a = pos1 - pos0;
-        let dir_a = a.normalize();
+        let dir_a = a.normalize_or_zero();
         // The third vertex is the one furthest away from the edge.
         let i2 = self.get_best_index_and_remove(|i| {
             let point_on_line = pos0 + (self.vertices[i] - pos0).dot(dir_a) * dir_a;

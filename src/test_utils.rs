@@ -50,7 +50,7 @@ pub fn consistency_check(
 
     let tri_list = convex_hull
         .iter()
-        .map(|tri| Triangle::new(vertices, [tri.0, tri.1, tri.2]))
+        .map(|tri| Triangle::new(vertices, tri.get_array()))
         .collect::<Vec<_>>();
     let all_edges = tri_list
         .iter()

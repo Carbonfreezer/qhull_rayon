@@ -38,10 +38,49 @@ proptest! {
     }
 }
 
-
 #[test]
 fn degenerate_convex_hull_test() {
-    let vertices = [Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0)];
+    let vertices = [
+        Vec3::new(0.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.0, 0.0),
+    ];
     let hull = generate_convex_hull(&vertices);
-    assert_eq!(hull, Err(ConvexHullError::DegenerateInput), "Degenerate convex hull expected");
+    assert_eq!(
+        hull,
+        Err(ConvexHullError::DegenerateInput),
+        "Degenerate convex hull expected"
+    );
+}
+
+#[test]
+fn too_few_vertices_test() {
+    let vertices = [
+        Vec3::new(0.0, 0.0, 0.0),
+        Vec3::new(1.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.1, 0.0),
+    ];
+    let hull = generate_convex_hull(&vertices);
+    assert_eq!(
+        hull,
+        Err(ConvexHullError::TooFewVertices { count: 3 }),
+        "Too few vertices with 3 expected."
+    );
+}
+
+#[test]
+fn borken_vertex_test() {
+    let vertices = [
+        Vec3::new(0.0, 0.0, 0.0),
+        Vec3::new(1.0, 0.0, 0.0),
+        Vec3::new(0.0, 0.1, 0.0),
+        Vec3::new(0.0, 0.0, f32::NAN),
+    ];
+    let hull = generate_convex_hull(&vertices);
+    assert_eq!(
+        hull,
+        Err(ConvexHullError::NonFiniteVertex { index: 3 }),
+        "Broken vertex at index 3 expected."
+    );
 }

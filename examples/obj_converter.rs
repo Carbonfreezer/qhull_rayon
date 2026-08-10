@@ -42,7 +42,7 @@ fn flatten_vectors(
     let mut look_up = FxHashMap::<usize, usize>::default();
     for tri in triangles {
         let new_ind = tri
-            .get_array()
+            .to_array()
             .into_iter()
             .map(|index| {
                 *look_up.entry(index).or_insert_with(|| {

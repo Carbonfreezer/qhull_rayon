@@ -4,7 +4,7 @@
 
 use crate::TriangleIndices;
 use crate::geometry_helper::{Edge, Triangle};
-use crate::hull_construction::{compute_tolerance_value};
+use crate::hull_construction::compute_tolerance_value;
 use fxhash::{FxHashMap, FxHashSet};
 use glam::Vec3;
 use itertools::iproduct;
@@ -17,13 +17,34 @@ pub enum ConsistencyError {
     /// There is a point outside the convex hull.
     PointOutsideConvexHull(
         /// The index of the point outside the hull.
-        usize
+        usize,
     ),
     /// The form is not closed.
     HullNotClosed,
     /// The face vertex relation does not hold.
     EulerRelationError,
 }
+
+impl std::fmt::Display for ConsistencyError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ConsistencyError::PointOutsideConvexHull(index) => {
+                write!(f, "Point outside convex hull at index {}", index)
+            }
+            ConsistencyError::HullNotClosed => {
+                write!(f, "Hull not closed")
+            }
+            ConsistencyError::EulerRelationError => {
+                write!(
+                    f,
+                    "Euler relation between triangles and vertices not given."
+                )
+            }
+        }
+    }
+}
+
+impl std::error::Error for ConsistencyError {}
 
 /// Runs a consistency check on the vertices and the computed convex hull. It makes sure,
 /// * there is no vertex outside the computed convex hull.
@@ -34,12 +55,18 @@ pub enum ConsistencyError {
 ///
 /// # Example
 /// ```
+/// # use std::error::Error;
+/// #
+/// # fn main() -> Result<(), Box<dyn Error>> {
 /// use glam::Vec3;
 /// use qhull_rayon::{generate_convex_hull};
 /// use qhull_rayon::test_utils::consistency_check;
 /// let positions = [Vec3{x:0.0, y:0.0, z:0.0}, Vec3{x:1.0, y:0.0, z:0.0}, Vec3{x:0.0, y:1.0, z:0.0}, Vec3{x:0.0, y:0.0, z:1.0}, Vec3{x:0.1, y:0.1, z:0.1}];
-/// let result = generate_convex_hull(&positions).expect("Input should be fine");
+/// let result = generate_convex_hull(&positions)?;
 /// assert_eq!(consistency_check(&positions, &result), Ok(()), "Something went wrong");
+/// #
+/// #     Ok(())
+/// # }
 /// ```
 pub fn consistency_check(
     vertices: &[Vec3],
@@ -50,7 +77,7 @@ pub fn consistency_check(
 
     let tri_list = convex_hull
         .iter()
-        .map(|tri| Triangle::new(vertices, tri.get_array()))
+        .map(|tri| Triangle::new(vertices, tri.to_array()))
         .collect::<Vec<_>>();
     let all_edges = tri_list
         .iter()
@@ -82,7 +109,7 @@ pub fn consistency_check(
     let used_vertices = FxHashSet::from_iter(
         tri_list
             .iter()
-            .flat_map(|tri| tri.get_triple_representation().get_array()),
+            .flat_map(|tri| tri.get_triple_representation().to_array()),
     )
     .len();
     if tri_list.len() + 4 != 2 * used_vertices {
@@ -97,11 +124,17 @@ pub fn consistency_check(
 ///
 /// # Example
 /// ```
+/// # use std::error::Error;
+/// #
+/// # fn main() -> Result<(), Box<dyn Error>> {
 /// use qhull_rayon::generate_convex_hull;
 /// use qhull_rayon::test_utils::{consistency_check, generate_cube};
 /// let cube = generate_cube(100.0, 10_000, 42);
-/// let hull = generate_convex_hull(&cube).unwrap();
-/// let _ = consistency_check(&cube, &hull).unwrap();
+/// let hull = generate_convex_hull(&cube)?;
+/// let _ = consistency_check(&cube, &hull)?;
+/// #
+/// #     Ok(())
+/// # }
 /// ```
 pub fn generate_cube(scale: f32, additional_vertices: usize, seed: u64) -> Vec<Vec3> {
     let mut result: Vec<Vec3> = Vec::with_capacity(additional_vertices + 27);
@@ -126,15 +159,21 @@ pub fn generate_cube(scale: f32, additional_vertices: usize, seed: u64) -> Vec<V
 }
 
 /// Generates a random sphere used for testing and profiling.
-/// Vertices are located on the inner side of the sphere. 
+/// Vertices are located on the inner side of the sphere.
 ///
 /// # Example
 /// ```
+/// # use std::error::Error;
+/// #
+/// # fn main() -> Result<(), Box<dyn Error>> {
 /// use qhull_rayon::generate_convex_hull;
 /// use qhull_rayon::test_utils::{consistency_check, generate_sphere};
 /// let sphere = generate_sphere(100.0, 10_000, 42);
-/// let hull = generate_convex_hull(&sphere).unwrap();
-/// let _ = consistency_check(&sphere, &hull).unwrap();
+/// let hull = generate_convex_hull(&sphere)?;
+/// let _ = consistency_check(&sphere, &hull)?;
+/// #
+/// #     Ok(())
+/// # }
 /// ```
 pub fn generate_sphere(scale: f32, vertices: usize, seed: u64) -> Vec<Vec3> {
     let mut rng = StdRng::seed_from_u64(seed);
@@ -154,16 +193,22 @@ pub fn generate_sphere(scale: f32, vertices: usize, seed: u64) -> Vec<Vec3> {
 }
 
 /// Generates a random hollow sphere used for testing and profiling.
-/// Vertices are only located on the sphere surface. 
+/// Vertices are only located on the sphere surface.
 /// This is the worst case assumption for this algorithm.
 ///
 /// # Example
 /// ```
+/// # use std::error::Error;
+/// #
+/// # fn main() -> Result<(), Box<dyn Error>> {
 /// use qhull_rayon::generate_convex_hull;
 /// use qhull_rayon::test_utils::{consistency_check, generate_sphere_hull};
 /// let sphere = generate_sphere_hull(100.0, 1_000, 42);
-/// let hull = generate_convex_hull(&sphere).unwrap();
-/// let _ = consistency_check(&sphere, &hull).unwrap();
+/// let hull = generate_convex_hull(&sphere)?;
+/// let _ = consistency_check(&sphere, &hull)?;
+/// #
+/// #     Ok(())
+/// # }
 /// ```
 pub fn generate_sphere_hull(scale: f32, vertices: usize, seed: u64) -> Vec<Vec3> {
     let mut rng = StdRng::seed_from_u64(seed);

@@ -89,7 +89,7 @@ impl<'a> Triangle<'a> {
             self.used_indices[2],
         )
     }
-    
+
     /// Gets the signed distance handed over from another triangle,
     pub(crate) fn get_signed_distance(&self, other_index: usize) -> f32 {
         self.normal

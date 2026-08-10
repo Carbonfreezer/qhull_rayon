@@ -45,6 +45,8 @@ be seen here: ![monkey with convex hull](https://raw.githubusercontent.com/Carbo
 It also comes with a benchmark system
 > `cargo bench`
 
+The bench system uses [Criterion](https://crates.io/crates/criterion). After execution the result can be found as an 
+html-report in `target/criterion/report/index.html`.
 Benches get executed with three different types of data set. The first one is a sphere where points are evenly
 distributed within the sphere. Measurements are done here via Criterion on 50, 1000, 10_000, 40_000 and 100_000 data
 points. The time used on a computer with an AMD Ryzen 9 9950X3D2 was
@@ -100,8 +102,11 @@ The efficiency of the algorithm hinges clearly on its culling ability.
 The project also contains an extensive test suite making use of property tests
 > `cargo test`
 
+The test suite makes use of property testing by the [proptest](https://crates.io/crates/proptest), 
+which scans the valid input range. On failure, it tries to find the minimal counter example.
+
 Documentation can be generated with
 > `cargo doc --open`
 
-if you want to include the documentation for the test utilities
+if you want to include the documentation for the test utilities add all-festures:
 > `cargo doc --open --all-features`

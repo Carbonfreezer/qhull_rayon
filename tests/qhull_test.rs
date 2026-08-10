@@ -37,3 +37,11 @@ proptest! {
        }
     }
 }
+
+
+#[test]
+fn degenerate_convex_hull_test() {
+    let vertices = [Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0), Vec3::new(0.0, 0.0, 0.0)];
+    let hull = generate_convex_hull(&vertices);
+    assert_eq!(hull, Err(ConvexHullError::DegenerateInput), "Degenerate convex hull expected");
+}

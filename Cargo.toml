@@ -7,6 +7,7 @@ repository = "https://github.com/Carbonfreezer/qhull_rayon"
 license = "MIT"
 keywords = ["q-hull", "convex_hull", "geometry"]
 readme = "README.md"
+authors = ["Christoph Lürig <christoph.luerig@gmail.com>"]
 
 [dependencies]
 glam = "0.33.3"

@@ -37,7 +37,7 @@ impl std::fmt::Display for ConsistencyError {
             ConsistencyError::EulerRelationError => {
                 write!(
                     f,
-                    "Euler relation between triangles and vertices not given."
+                    "Euler relation between triangles and vertices not given. F = 2 * V - 4"
                 )
             }
         }
@@ -46,7 +46,10 @@ impl std::fmt::Display for ConsistencyError {
 
 impl std::error::Error for ConsistencyError {}
 
-/// Runs a consistency check on the vertices and the computed convex hull. It makes sure,
+/// Runs a consistency check on the vertices and the computed convex hull. 
+/// 
+/// # Error
+/// A [ConsistencyError] is returned in any of the following cases
 /// * there is no vertex outside the computed convex hull.
 /// * that for every edge there is an edge in the opposite direction.
 /// * For a simplex hull, we must have F = 2V - 4

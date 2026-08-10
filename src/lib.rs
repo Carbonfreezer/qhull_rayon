@@ -65,7 +65,9 @@ impl std::error::Error for ConvexHullError {}
 /// Generates the convex hull from a list of positions handed over. From the positions, triangles are returned
 /// with the indices given in counterclockwise order seen from the outside.
 ///
-/// This function returns an error in the following cases
+/// 
+/// # Error
+/// This function returns a [convex hull error](ConvexHullError) in the following cases
 /// 1. There are less than 4 vertices handed over.
 /// 2. One of the vertices as an infinite or a NaN component.
 /// 3. The vertices handed over are coplanar, colinear or the same.

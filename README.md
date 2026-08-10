@@ -24,13 +24,13 @@ The entry in `cargo.toml` can be done in two ways: the standard way.
 
 ```cargo.toml
 [dependencies]
-qhull_rayon = " .. "
+qhull_rayon = " <version here> "
 ```
 
 or if you want to have access to some internal generation and test functions
 ```cargo.toml
 [dependencies]
-qhull_rayon = {version = " .. ", features = ["test-utils"]}
+qhull_rayon = {version = " <version here> ", features = ["test-utils"]}
 ```
 
 

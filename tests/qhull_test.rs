@@ -70,7 +70,7 @@ fn too_few_vertices_test() {
 }
 
 #[test]
-fn borken_vertex_test() {
+fn broken_vertex_test() {
     let vertices = [
         Vec3::new(0.0, 0.0, 0.0),
         Vec3::new(1.0, 0.0, 0.0),

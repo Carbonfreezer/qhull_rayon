@@ -14,14 +14,14 @@ use std::path::Path;
 /// The error that can happen in the construction of a mesh, if one of the indices handed over is not
 /// in the vertex array.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct IndexOutOfBoundsError(
+pub struct IndexOutOfBoundsError {
     /// The index that is not contained in the vertices.
-    pub usize
-);
+    pub index: usize
+}
 
 impl std::fmt::Display for IndexOutOfBoundsError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
-        write!(f, "Index out of bounds: {}", self.0)
+        write!(f, "Index out of bounds: {}", self.index)
     }
 }
 
@@ -72,7 +72,7 @@ impl Mesh {
             .flat_map(TriangleIndices::to_array)
             .find(|&index| index >= vertices.len())
         {
-            return Err(IndexOutOfBoundsError(index));
+            return Err(IndexOutOfBoundsError{index});
         }
 
         let mut new_vertices = Vec::new();

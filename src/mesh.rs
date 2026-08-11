@@ -1,7 +1,7 @@
 //! This module contains a complete mesh; it is intended for the case that an indexing into the old
 //! vertices is not sufficient, but a completely separate structure of vertices and triangle indices is wanted.
 //! It rebuilds a new vertex array from existing data. It can be used with or independently of the
-//! convex hull calculation.
+//! convex hull calculation. The point of the structure is, that it filters out unused vertices.
 
 use crate::TriangleIndices;
 use fxhash::FxHashMap;

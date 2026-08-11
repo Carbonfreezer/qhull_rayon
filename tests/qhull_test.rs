@@ -1,7 +1,20 @@
 //! Test for the qhull library.
+
+use fxhash::FxHashSet;
 use proptest::prelude::*;
 use qhull_rayon::test_utils::*;
 use qhull_rayon::*;
+use qhull_rayon::mesh::Mesh;
+
+
+/// Checks if there are some vertices left over in the containing vertex array that are not indexed.
+fn test_internal_consistency(mesh : &Mesh) -> Result<(), usize> {
+    let all_indices = mesh.triangles.iter().flat_map(TriangleIndices::to_array).collect::<FxHashSet<_>>();
+    for i in 0..mesh.vertices.len() {
+        if !all_indices.contains(&i) {return Err(i)}
+    }
+    Ok(())
+}
 
 // Tests
 proptest! {
@@ -35,6 +48,32 @@ proptest! {
            Err(ConvexHullError::DegenerateInput) => {} // Can happen with fewer poins
            Err(e) => return Err(TestCaseError::fail(format!("hull failed: {e}"))),
        }
+    }
+}
+
+proptest! {
+    #[test]
+    fn  mesh_test(radius in 0.0001f32..100_000.0f32, vert_num in 4usize..4_000, seed in any::<u64>()) {
+       let vertices = generate_sphere(radius, vert_num, seed);
+       let hull = match generate_convex_hull(&vertices) {
+           Ok(hull) => { prop_assert_eq!(consistency_check(&vertices, &hull), Ok(())); hull} ,
+           Err(ConvexHullError::DegenerateInput) => {return Ok(())} // Can happen with fewer poins
+           Err(e) => return Err(TestCaseError::fail(format!("hull failed: {e}"))),
+       };
+
+       // Can we create a convex hull out if it?
+       let mesh = match Mesh::new(&vertices, &hull) {
+            Ok(mesh) => mesh,
+            Err(e) => return Err(TestCaseError::fail(format!("mesh construction failed: {e}")))
+        };
+
+        // Are there any vertices left over.
+        if let Err(e) = test_internal_consistency(&mesh) {
+            return Err(TestCaseError::fail(format!("Vertex with index left over: {e}")))
+        }
+
+        // Is it really convex?
+        prop_assert_eq!(consistency_check(&mesh.vertices, &mesh.triangles), Ok(()));
     }
 }
 

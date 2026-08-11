@@ -61,7 +61,7 @@ proptest! {
            Err(e) => return Err(TestCaseError::fail(format!("hull failed: {e}"))),
        };
 
-       // Can we create a convex hull out if it?
+       // Can we create a reduced mesh out if it?
        let mesh = match Mesh::new(&vertices, &hull) {
             Ok(mesh) => mesh,
             Err(e) => return Err(TestCaseError::fail(format!("mesh construction failed: {e}")))
@@ -72,7 +72,7 @@ proptest! {
             return Err(TestCaseError::fail(format!("Vertex with index left over: {e}")))
         }
 
-        // Is it really convex?
+        // Is it really a convex mesh?
         prop_assert_eq!(consistency_check(&mesh.vertices, &mesh.triangles), Ok(()));
     }
 }

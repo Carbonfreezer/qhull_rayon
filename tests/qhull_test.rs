@@ -4,7 +4,7 @@ use fxhash::FxHashSet;
 use proptest::prelude::*;
 use qhull_rayon::test_utils::*;
 use qhull_rayon::*;
-use qhull_rayon::mesh::Mesh;
+use qhull_rayon::mesh::{IndexOutOfBoundsError, Mesh};
 
 
 /// Checks if there are some vertices left over in the containing vertex array that are not indexed.
@@ -122,4 +122,10 @@ fn broken_vertex_test() {
         Err(ConvexHullError::NonFiniteVertex { index: 3 }),
         "Broken vertex at index 3 expected."
     );
+}
+
+#[test]
+fn broken_mesh_test() {
+    let test = Mesh::new(&[], &[TriangleIndices(0,0,0)]);
+    assert_eq!(test, Err(IndexOutOfBoundsError{index : 0}), "Index of out bounds should have been reached");
 }

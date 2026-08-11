@@ -9,7 +9,8 @@ keywords = ["q-hull", "convex_hull", "geometry"]
 readme = "README.md"
 authors = ["Christoph Lürig <christoph.luerig@gmail.com>"]
 exclude = [
-    "test_data/*",
+    "test_data/Monkey.png",
+    "test_data/out_file.obj",
     "performance_shots/*",
 ]
 

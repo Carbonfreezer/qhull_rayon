@@ -87,9 +87,9 @@ impl std::error::Error for ConvexHullError {}
 ///
 /// # Error
 /// This function returns a [convex hull error](ConvexHullError) in the following cases
-/// 1. There are less than 4 vertices handed over.
-/// 2. One of the vertices as an infinite or a NaN component.
-/// 3. The vertices handed over are coplanar, colinear or the same.
+/// 1. There are fewer than 4 vertices handed over.
+/// 2. One of the vertices has an infinite or a NaN component.
+/// 3. The vertices handed over are coplanar, collinear, or the same.
 ///
 /// # Example
 /// ```

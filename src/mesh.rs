@@ -1,6 +1,6 @@
-//! This module contains a complete mesh it is intended for the case that an indexing into the old
-//! vertices is not sufficient but a complete separate structure of vertices and triangle indices is wanted.
-//! It rebuilds a new vertex array from existing data. It can be  used  with or independently of the
+//! This module contains a complete mesh; it is intended for the case that an indexing into the old
+//! vertices is not sufficient, but a completely separate structure of vertices and triangle indices is wanted.
+//! It rebuilds a new vertex array from existing data. It can be used with or independently of the
 //! convex hull calculation.
 
 use crate::TriangleIndices;
@@ -14,7 +14,10 @@ use std::path::Path;
 /// The error that can happen in the construction of a mesh, if one of the indices handed over is not
 /// in the vertex array.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
-pub struct IndexOutOfBoundsError(pub usize);
+pub struct IndexOutOfBoundsError(
+    /// The index that is not contained in the vertices.
+    pub usize
+);
 
 impl std::fmt::Display for IndexOutOfBoundsError {
     fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
@@ -36,11 +39,11 @@ pub struct Mesh {
 }
 
 impl Mesh {
-    /// Creates a mesh from the vertices and the triangles handed over. There can be more vertices provided then there are actually used.
+    /// Creates a mesh from the vertices and the triangles handed over. More vertices can be provided than are actually used.
     /// They will get compacted out during the process.
     ///
     /// # Error
-    /// If one of the triangles contains an index, that is not in the mesh an error is returned.
+    /// If one of the triangles contains an index that is not in the mesh, an error is returned.
     ///
     ///
     /// # Example
@@ -54,7 +57,7 @@ impl Mesh {
     /// let positions = [Vec3{x:0.0, y:0.0, z:0.0}, Vec3{x:1.0, y:0.0, z:0.0}, Vec3{x:0.0, y:1.0, z:0.0}, Vec3{x:0.0, y:0.0, z:1.0}, Vec3{x:0.1, y:0.1, z:0.1}];
     /// let indices = generate_convex_hull(&positions)?;
     /// let new_mesh = Mesh::new(&positions, &indices)?;
-    /// assert_eq!(new_mesh.vertices.len(), 4, "We should There should be exactly four vertices left.");
+    /// assert_eq!(new_mesh.vertices.len(), 4, "We should have exactly four vertices left.");
     /// #
     /// #     Ok(())
     /// # }
@@ -92,11 +95,11 @@ impl Mesh {
         })
     }
 
-    /// Saves the current mesh as a simple obj file. This is plain positions and triangle indices
+    /// Saves the current mesh as a simple Wavefront obj file. Plain positions and triangle indices
     /// are saved.
     ///
     /// # Error
-    /// The io errors on files access.
+    /// The io errors on file access.
     ///
     /// # Example
     ///
@@ -112,7 +115,7 @@ impl Mesh {
     /// let indices = generate_convex_hull(&positions)?;
     /// let new_mesh = Mesh::new(&positions, &indices)?;
     /// new_mesh.save_as_obj_file(Path::new("Processed.obj"))?;
-    /// assert_eq!(new_mesh.vertices.len(), 4, "We should There should be exactly four vertices left.");
+    /// assert_eq!(new_mesh.vertices.len(), 4, "We should have exactly four vertices left.");
     /// #
     /// #     Ok(())
     /// # }

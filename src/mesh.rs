@@ -33,12 +33,33 @@ impl std::error::Error for IndexOutOfBoundsError {}
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct Mesh {
     /// The vertex positions of the mesh.
-    pub vertices: Vec<Vec3>,
+    vertices: Vec<Vec3>,
     /// The mesh as single triangles.
-    pub triangles: Vec<TriangleIndices>,
+    triangles: Vec<TriangleIndices>,
 }
 
 impl Mesh {
+
+    /// Asks for the vertices.
+    ///
+    /// # Example
+    /// ```
+    /// use qhull_rayon::mesh::Mesh;
+    /// let mesh = Mesh::default();
+    /// assert!(mesh.vertices().is_empty());
+    /// ```
+    pub fn vertices(&self) -> &[Vec3] {&self.vertices}
+
+    /// Asks for the triangles.
+    ///
+    /// # Example
+    /// ```
+    /// use qhull_rayon::mesh::Mesh;
+    /// let mesh = Mesh::default();
+    /// assert!(mesh.triangles().is_empty());
+    /// ```
+    pub fn triangles(&self) -> &[TriangleIndices] {&self.triangles}
+
     /// Creates a mesh from the vertices and the triangles handed over. More vertices can be provided than are actually used.
     /// They will get compacted out during the process.
     ///
@@ -57,7 +78,7 @@ impl Mesh {
     /// let positions = [Vec3{x:0.0, y:0.0, z:0.0}, Vec3{x:1.0, y:0.0, z:0.0}, Vec3{x:0.0, y:1.0, z:0.0}, Vec3{x:0.0, y:0.0, z:1.0}, Vec3{x:0.1, y:0.1, z:0.1}];
     /// let indices = generate_convex_hull(&positions)?;
     /// let new_mesh = Mesh::new(&positions, &indices)?;
-    /// assert_eq!(new_mesh.vertices.len(), 4, "We should have exactly four vertices left.");
+    /// assert_eq!(new_mesh.vertices().len(), 4, "We should have exactly four vertices left.");
     /// #
     /// #     Ok(())
     /// # }
@@ -115,7 +136,7 @@ impl Mesh {
     /// let indices = generate_convex_hull(&positions)?;
     /// let new_mesh = Mesh::new(&positions, &indices)?;
     /// new_mesh.save_as_obj_file(Path::new("Processed.obj"))?;
-    /// assert_eq!(new_mesh.vertices.len(), 4, "We should have exactly four vertices left.");
+    /// assert_eq!(new_mesh.vertices().len(), 4, "We should have exactly four vertices left.");
     /// #
     /// #     Ok(())
     /// # }

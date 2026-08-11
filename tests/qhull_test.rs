@@ -9,8 +9,8 @@ use qhull_rayon::mesh::{IndexOutOfBoundsError, Mesh};
 
 /// Checks if there are some vertices left over in the containing vertex array that are not indexed.
 fn test_internal_consistency(mesh : &Mesh) -> Result<(), usize> {
-    let all_indices = mesh.triangles.iter().flat_map(TriangleIndices::to_array).collect::<FxHashSet<_>>();
-    for i in 0..mesh.vertices.len() {
+    let all_indices = mesh.triangles().iter().flat_map(TriangleIndices::to_array).collect::<FxHashSet<_>>();
+    for i in 0..mesh.vertices().len() {
         if !all_indices.contains(&i) {return Err(i)}
     }
     Ok(())
@@ -73,7 +73,7 @@ proptest! {
         }
 
         // Is it really a convex mesh?
-        prop_assert_eq!(consistency_check(&mesh.vertices, &mesh.triangles), Ok(()));
+        prop_assert_eq!(consistency_check(mesh.vertices(), mesh.triangles()), Ok(()));
     }
 }
 

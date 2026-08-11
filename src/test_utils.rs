@@ -46,8 +46,8 @@ impl std::fmt::Display for ConsistencyError {
 
 impl std::error::Error for ConsistencyError {}
 
-/// Runs a consistency check on the vertices and the computed convex hull. 
-/// 
+/// Runs a consistency check on the vertices and the computed convex hull.
+///
 /// # Error
 /// A [ConsistencyError] is returned in any of the following cases
 /// * there is no vertex outside the computed convex hull.

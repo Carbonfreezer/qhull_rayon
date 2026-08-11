@@ -9,6 +9,7 @@
 mod geometry_helper;
 mod hull_construction;
 // lib.rs
+pub mod mesh;
 #[cfg(feature = "test-utils")]
 pub mod test_utils;
 
@@ -23,8 +24,27 @@ pub struct TriangleIndices(pub usize, pub usize, pub usize);
 
 impl TriangleIndices {
     /// Gets the inner indices as an array. Useful for further processing with iterators.
+    ///
+    /// # Example
+    /// ```
+    /// use qhull_rayon::TriangleIndices;
+    /// let a = TriangleIndices(0,1,2);
+    /// let b = a.to_array();
+    /// assert_eq!(b, [0,1,2]);
+    /// ```
     pub fn to_array(&self) -> [usize; 3] {
         [self.0, self.1, self.2]
+    }
+
+    /// Computes an index structure from an array.
+    ///
+    /// # Example
+    /// ```
+    /// use qhull_rayon::TriangleIndices;
+    /// let a = TriangleIndices::from_array([1,2,3]);
+    /// assert_eq!(a, TriangleIndices(1,2,3));
+    pub fn from_array(indices: [usize; 3]) -> Self {
+        TriangleIndices(indices[0], indices[1], indices[2])
     }
 }
 

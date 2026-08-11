@@ -31,6 +31,7 @@ use qhull_rayon::mesh::Mesh;
 let positions = [Vec3{x:0.0, y:0.0, z:0.0}, Vec3{x:1.0, y:0.0, z:0.0}, Vec3{x:0.0, y:1.0, z:0.0}, Vec3{x:0.0, y:0.0, z:1.0}, Vec3{x:0.1, y:0.1, z:0.1}];
 let indices = generate_convex_hull(&positions)?;
 let new_mesh = Mesh::new(&positions, &indices)?;
+new_mesh.save_as_obj_file(Path::new("Processed.obj"))?;
 assert_eq!(new_mesh.vertices.len(), 4, "We should have exactly four vertices left.");    
 ```
 

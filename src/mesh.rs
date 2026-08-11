@@ -134,7 +134,6 @@ impl Mesh {
             writeln!(out, "f {} {} {}", tri.0 + 1, tri.1 + 1, tri.2 + 1)?;
         }
 
-        out.flush()?;
-        Ok(())
+        out.flush()
     }
 }

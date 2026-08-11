@@ -16,8 +16,22 @@ The direct way to use the algorithm is by:
 use glam::Vec3;
 use qhull_rayon::generate_convex_hull;
 let positions = [Vec3{x:0.0, y:0.0, z:0.0}, Vec3{x:1.0, y:0.0, z:0.0}, Vec3{x:0.0, y:1.0, z:0.0}, Vec3{x:0.0, y:0.0, z:1.0}, Vec3{x:0.1, y:0.1, z:0.1}];
-let result = generate_convex_hull( & positions).expect("Input should be fine");
+let result = generate_convex_hull(&positions)?;
 assert_eq!(result.len(), 4, "We should get the four triangles of the outer tetrahedron");
+```
+
+The index structure for the triangles returned refers to the original vertex positions. If you want to have a separate mesh structure with only the vertices left,
+that are part of the convex hull, you can use the `Mesh` structure, which is a part of the library. Its main function is to filter out unused vertices. 
+The contents can also be saved as a Wavefront obj file.
+
+```rust
+use glam::Vec3;
+use qhull_rayon::generate_convex_hull;
+use qhull_rayon::mesh::Mesh;
+let positions = [Vec3{x:0.0, y:0.0, z:0.0}, Vec3{x:1.0, y:0.0, z:0.0}, Vec3{x:0.0, y:1.0, z:0.0}, Vec3{x:0.0, y:0.0, z:1.0}, Vec3{x:0.1, y:0.1, z:0.1}];
+let indices = generate_convex_hull(&positions)?;
+let new_mesh = Mesh::new(&positions, &indices)?;
+assert_eq!(new_mesh.vertices.len(), 4, "We should have exactly four vertices left.");    
 ```
 
 The entry in `cargo.toml` can be done in two ways: the standard way. 
@@ -36,7 +50,7 @@ qhull_rayon = {version = " <version here> ", features = ["test-utils"]}
 
 ## Additional material
 
-The bundle comes with an example, that can be started by:
+The git hub repo comes with an example, that can be started by:
 > `cargo run --release --example obj_converter -- test_data/in_file.obj test_data/out_file.obj`
 
 The example takes the exported Suzanne monkey from Blender and computes the convex hull. A rendering of the result can
@@ -103,10 +117,10 @@ The project also contains an extensive test suite making use of property tests
 > `cargo test`
 
 The test suite makes use of property testing by the [proptest](https://crates.io/crates/proptest), 
-which scans the valid input range. On failure, it tries to find the minimal counter example.
+which scans the valid input range. On failure, it tries to find the minimal counterexample.
 
 Documentation can be generated with
 > `cargo doc --open`
 
-if you want to include the documentation for the test utilities add all-festures:
+If you want to include the documentation for the test utilities, add all-features:
 > `cargo doc --open --all-features`

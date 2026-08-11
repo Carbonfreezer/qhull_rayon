@@ -16,7 +16,7 @@ use std::path::Path;
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IndexOutOfBoundsError {
     /// The index that is not contained in the vertices.
-    pub index: usize
+    pub index: usize,
 }
 
 impl std::fmt::Display for IndexOutOfBoundsError {
@@ -39,7 +39,6 @@ pub struct Mesh {
 }
 
 impl Mesh {
-
     /// Asks for the vertices.
     ///
     /// # Example
@@ -48,7 +47,9 @@ impl Mesh {
     /// let mesh = Mesh::default();
     /// assert!(mesh.vertices().is_empty());
     /// ```
-    pub fn vertices(&self) -> &[Vec3] {&self.vertices}
+    pub fn vertices(&self) -> &[Vec3] {
+        &self.vertices
+    }
 
     /// Asks for the triangles.
     ///
@@ -58,7 +59,9 @@ impl Mesh {
     /// let mesh = Mesh::default();
     /// assert!(mesh.triangles().is_empty());
     /// ```
-    pub fn triangles(&self) -> &[TriangleIndices] {&self.triangles}
+    pub fn triangles(&self) -> &[TriangleIndices] {
+        &self.triangles
+    }
 
     /// Creates a mesh from the vertices and the triangles handed over. More vertices can be provided than are actually used.
     /// They will get compacted out during the process.
@@ -93,7 +96,7 @@ impl Mesh {
             .flat_map(TriangleIndices::to_array)
             .find(|&index| index >= vertices.len())
         {
-            return Err(IndexOutOfBoundsError{index});
+            return Err(IndexOutOfBoundsError { index });
         }
 
         let mut new_vertices = Vec::new();

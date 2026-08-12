@@ -6,16 +6,16 @@ use qhull_rayon::*;
 fn bench_hull_efficient(c: &mut Criterion) {
     let mut group = c.benchmark_group("hull efficient");
 
-    for n in [50usize, 1000, 10_000, 40_000, 100_000] {
+    for n in [50usize, 500, 1000, 10_000, 40_000, 80_000, 100_000] {
         group.bench_with_input(BenchmarkId::new("sphere", n), &n, |b, &n| {
-            let vertices = generate_sphere(1.0, n, 42);
+            let vertices = generate_sphere(1.0, n, n as u64);
             b.iter(|| {
                 let _ = generate_convex_hull(&vertices);
             });
         });
 
         group.bench_with_input(BenchmarkId::new("cube", n), &n, |b, &n| {
-            let vertices = generate_cube(1.0, n - 27, 42);
+            let vertices = generate_cube(1.0, n - 27, n as u64);
             b.iter(|| {
                 let _ = generate_convex_hull(&vertices);
             });
@@ -28,9 +28,9 @@ fn bench_hull_efficient(c: &mut Criterion) {
 fn bench_hull_slow(c: &mut Criterion) {
     let mut group = c.benchmark_group("hull slow");
 
-    for n in [100usize, 1_000, 1_500, 2_000] {
+    for n in [100usize, 500, 1_000, 1_200, 1_300, 1_400, 1_500, 2_000] {
         group.bench_with_input(BenchmarkId::new("sphere hull", n), &n, |b, &n| {
-            let vertices = generate_sphere_hull(1.0, n, 42);
+            let vertices = generate_sphere_hull(1.0, n, n as u64);
             b.iter(|| {
                 let _ = generate_convex_hull(&vertices);
             });

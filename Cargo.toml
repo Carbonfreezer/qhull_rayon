@@ -34,3 +34,6 @@ tobj = "4.0.5"
 name = "hull_bench"
 harness = false
 
+[profile.profiling]
+inherits = "release"
+debug = true

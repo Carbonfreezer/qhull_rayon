@@ -33,15 +33,22 @@ pub(crate) struct Triangle<'a> {
     /// The vertices we take control over.
     regarded_vertices: Vec<usize>,
     /// The furthest away vertex we have we we have one.
-    furthest_vertex_and_dist : Option<(usize, f32)>
+    furthest_vertex_and_dist : Option<(usize, f32)>,
+    /// Flags it for deletion.
+    deletion_mark : bool,
 }
 
 impl<'a> Triangle<'a> {
 
+    /// Checks if we are deleted.
+    pub fn is_deleted(&self) -> bool {self.deletion_mark}
     /// Asks for the vertex index that is furthest away for this triangle if existing.
     pub fn furthest_vertex_and_dist(&self) -> Option<(usize, f32)> {
         self.furthest_vertex_and_dist
     }
+
+
+    pub fn mark_deleted(&mut self) {self.deletion_mark = true;}
 
     /// Asks for the vertices we are responsible for.
     pub fn regarded_vertices(&self) -> impl Iterator<Item=&usize> + '_  {
@@ -73,7 +80,8 @@ impl<'a> Triangle<'a> {
                 },
             ],
             regarded_vertices : Vec::new(),
-            furthest_vertex_and_dist : None
+            furthest_vertex_and_dist : None,
+            deletion_mark : false,
         }
     }
 

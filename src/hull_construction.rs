@@ -7,7 +7,6 @@ use glam::Vec3;
 use rayon::prelude::{
     IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator,
 };
-use std::mem::take;
 
 const RELATIVE_TOLERANCE: f32 = 1e-5;
 
@@ -188,37 +187,29 @@ impl<'a> HullConstructor<'a> {
         self.build_initial_tetrahedron()?;
         while let Some(next_vertex) = self.get_best_vertex() {
 
-            // Partition the triangles in to be deleted and remaining.
-            let (mut remaining, deleted): (Vec<_>, Vec<_>) = take(&mut self.hull_triangles)
-                .into_iter()
-                .partition(|tri| tri.get_signed_distance(next_vertex) <= 0.0);
-
-            // Now we need to get the iterator over all deleted triangles.
-            let mut vertices_to_reassign : Vec<usize> = Vec::new();
-            for tri in &deleted {
-                vertices_to_reassign.extend(tri.regarded_vertices());
+            // Mark and collect
+            let mut vertices_to_reassign = Vec::new();
+            let mut all_edges = FxHashSet::default();
+            for tri in &mut self.hull_triangles {
+                if tri.get_signed_distance(next_vertex) > 0.0 {
+                    tri.mark_deleted();
+                    vertices_to_reassign.extend(tri.regarded_vertices());
+                    all_edges.extend(tri.edges());
+                }
             }
-            
-            // Extract the outer boundary edges of the elements that get deleted.
-            let all_edges = deleted
-                .into_iter()
-                .flat_map(|tri| tri.edges())
-                .collect::<FxHashSet<_>>();
-            let boundary_edges = all_edges
-                .iter()
-                .filter(|edge| !all_edges.contains(&edge.reversed()))
-                .collect::<Vec<_>>();
 
-            let mut new_triangles : Vec<_> = boundary_edges
-                .iter()
-                .map(|edge| Triangle::from_edge_and_points(self.vertices, edge, next_vertex)).collect();
+            let boundary: Vec<_> = all_edges.iter()
+                .filter(|e| !all_edges.contains(&e.reversed()))
+                .copied()
+                .collect();
 
+            self.hull_triangles.retain(|tri| !tri.is_deleted());
 
+            let mut new_triangles: Vec<_> = boundary.iter()
+                .map(|e| Triangle::from_edge_and_points(self.vertices, e, next_vertex))
+                .collect();
             assign_vertices_to_tris(&vertices_to_reassign, next_vertex, &mut new_triangles, self.tolerance);
-
-            remaining.extend(new_triangles.into_iter());
-
-            self.hull_triangles = remaining;
+            self.hull_triangles.extend(new_triangles);
         }
 
         Ok(self

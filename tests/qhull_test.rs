@@ -2,16 +2,21 @@
 
 use fxhash::FxHashSet;
 use proptest::prelude::*;
+use qhull_rayon::mesh::{IndexOutOfBoundsError, Mesh};
 use qhull_rayon::test_utils::*;
 use qhull_rayon::*;
-use qhull_rayon::mesh::{IndexOutOfBoundsError, Mesh};
-
 
 /// Checks if there are some vertices left over in the containing vertex array that are not indexed.
-fn test_internal_consistency(mesh : &Mesh) -> Result<(), usize> {
-    let all_indices = mesh.triangles().iter().flat_map(TriangleIndices::to_array).collect::<FxHashSet<_>>();
+fn test_internal_consistency(mesh: &Mesh) -> Result<(), usize> {
+    let all_indices = mesh
+        .triangles()
+        .iter()
+        .flat_map(TriangleIndices::to_array)
+        .collect::<FxHashSet<_>>();
     for i in 0..mesh.vertices().len() {
-        if !all_indices.contains(&i) {return Err(i)}
+        if !all_indices.contains(&i) {
+            return Err(i);
+        }
     }
     Ok(())
 }
@@ -126,14 +131,47 @@ fn broken_vertex_test() {
 
 #[test]
 fn broken_mesh_test() {
-    let test = Mesh::new(&[], &[TriangleIndices(0,0,0)]);
-    assert_eq!(test, Err(IndexOutOfBoundsError{index : 0}), "Index of out bounds should have been reached");
+    let test = Mesh::new(&[], &[TriangleIndices(0, 0, 0)]);
+    assert_eq!(
+        test,
+        Err(IndexOutOfBoundsError { index: 0 }),
+        "Index of out bounds should have been reached"
+    );
 }
-
 
 #[test]
 fn first_test() {
-    let positions = [Vec3{x:0.0, y:0.0, z:0.0}, Vec3{x:1.0, y:0.0, z:0.0}, Vec3{x:0.0, y:1.0, z:0.0}, Vec3{x:0.0, y:0.0, z:1.0}, Vec3{x:0.1, y:0.1, z:0.1}];
+    let positions = [
+        Vec3 {
+            x: 0.0,
+            y: 0.0,
+            z: 0.0,
+        },
+        Vec3 {
+            x: 1.0,
+            y: 0.0,
+            z: 0.0,
+        },
+        Vec3 {
+            x: 0.0,
+            y: 1.0,
+            z: 0.0,
+        },
+        Vec3 {
+            x: 0.0,
+            y: 0.0,
+            z: 1.0,
+        },
+        Vec3 {
+            x: 0.1,
+            y: 0.1,
+            z: 0.1,
+        },
+    ];
     let result = generate_convex_hull(&positions).unwrap();
-    assert_eq!(result.len(), 4, "We should get the four triangles of the outer tetrahedron");
+    assert_eq!(
+        result.len(),
+        4,
+        "We should get the four triangles of the outer tetrahedron"
+    );
 }

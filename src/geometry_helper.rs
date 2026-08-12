@@ -33,18 +33,17 @@ pub(crate) struct Triangle<'a> {
     /// The vertices we take control over.
     regarded_vertices: Vec<usize>,
     /// The furthest away vertex we have we we have one.
-    furthest_vertex_and_dist : Option<(usize, f32)>,
+    furthest_vertex_and_dist: Option<(usize, f32)>,
 }
 
 impl<'a> Triangle<'a> {
-
     /// Asks for the vertex index that is furthest away for this triangle if existing.
     pub fn furthest_vertex_and_dist(&self) -> Option<(usize, f32)> {
         self.furthest_vertex_and_dist
     }
 
     /// Asks for the vertices we are responsible for.
-    pub fn regarded_vertices(&self) -> impl Iterator<Item=&usize> + '_  {
+    pub fn regarded_vertices(&self) -> impl Iterator<Item = &usize> + '_ {
         self.regarded_vertices.iter()
     }
 
@@ -72,8 +71,8 @@ impl<'a> Triangle<'a> {
                     end: indices[0],
                 },
             ],
-            regarded_vertices : Vec::new(),
-            furthest_vertex_and_dist : None,
+            regarded_vertices: Vec::new(),
+            furthest_vertex_and_dist: None,
         }
     }
 
@@ -113,18 +112,15 @@ impl<'a> Triangle<'a> {
             .dot(self.base_vertices[other_index] - self.base_point)
     }
 
-
-
     /// Assigns the vertex to our responsibility
-    pub (crate) fn assign_vertex(&mut self, candidate: usize) {
+    pub(crate) fn assign_vertex(&mut self, candidate: usize) {
         self.regarded_vertices.push(candidate);
         let dist = self.get_signed_distance(candidate);
         if let Some((_, old_dist)) = self.furthest_vertex_and_dist {
             if dist > old_dist {
                 self.furthest_vertex_and_dist = Some((candidate, dist));
             }
-        }
-        else {
+        } else {
             self.furthest_vertex_and_dist = Some((candidate, dist));
         }
     }

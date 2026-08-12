@@ -11,10 +11,9 @@ const RELATIVE_TOLERANCE: f32 = 1e-5;
 pub(crate) fn compute_tolerance_value(vertices: &[Vec3]) -> f32 {
     let (min, max) = vertices
         .iter()
-        .fold(
-            (Vec3::INFINITY, Vec3::NEG_INFINITY),
-            |(lo, hi), v| (lo.min(*v), hi.max(*v)),
-        );
+        .fold((Vec3::INFINITY, Vec3::NEG_INFINITY), |(lo, hi), v| {
+            (lo.min(*v), hi.max(*v))
+        });
     (max - min).length() * RELATIVE_TOLERANCE
 }
 
@@ -148,12 +147,7 @@ impl<'a> HullConstructor<'a> {
         }
 
         // Vertex i0 is removed anyway.
-        assign_vertices_to_tris(
-            &vertex_list,
-            i0,
-            &mut triangles,
-            self.tolerance,
-        );
+        assign_vertices_to_tris(&vertex_list, i0, &mut triangles, self.tolerance);
 
         self.hull_triangles = triangles;
         Ok(())
@@ -161,10 +155,12 @@ impl<'a> HullConstructor<'a> {
 
     /// Gets the best candidate if it exists.
     fn get_best_vertex(&self) -> Option<usize> {
-        let (candidate,_) = self.hull_triangles.iter().fold(
+        let (candidate, _) = self.hull_triangles.iter().fold(
             (None, f32::NEG_INFINITY),
             |(probe, best_dist), tri| {
-                if let Some((vertex, dist)) = tri.furthest_vertex_and_dist() && dist > best_dist {
+                if let Some((vertex, dist)) = tri.furthest_vertex_and_dist()
+                    && dist > best_dist
+                {
                     (Some(vertex), dist)
                 } else {
                     (probe, best_dist)
@@ -179,7 +175,6 @@ impl<'a> HullConstructor<'a> {
     pub(crate) fn generate_convex_hull(&mut self) -> Result<Vec<TriangleIndices>, ConvexHullError> {
         self.build_initial_tetrahedron()?;
         while let Some(next_vertex) = self.get_best_vertex() {
-
             // Mark and collect
             let mut vertices_to_reassign = Vec::new();
             let mut all_edges = FxHashSet::default();
@@ -200,16 +195,20 @@ impl<'a> HullConstructor<'a> {
             }
 
             // Get the seam edges.
-            let boundary: Vec<_> = all_edges.iter()
-                .filter(|e| !all_edges.contains(&e.reversed()))
-                .copied()
+            let mut new_triangles: Vec<_> = all_edges
+                .iter()
+                .filter_map(|e| {
+                    (!all_edges.contains(&e.reversed()))
+                        .then(|| Triangle::from_edge_and_points(self.vertices, e, next_vertex))
+                })
                 .collect();
 
-            // Create new triangles and reassign vertices.            
-            let mut new_triangles: Vec<_> = boundary.iter()
-                .map(|e| Triangle::from_edge_and_points(self.vertices, e, next_vertex))
-                .collect();
-            assign_vertices_to_tris(&vertices_to_reassign, next_vertex, &mut new_triangles, self.tolerance);
+            assign_vertices_to_tris(
+                &vertices_to_reassign,
+                next_vertex,
+                &mut new_triangles,
+                self.tolerance,
+            );
             self.hull_triangles.extend(new_triangles);
         }
 

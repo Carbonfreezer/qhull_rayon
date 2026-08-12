@@ -110,7 +110,7 @@ pub fn generate_convex_hull(vertices: &[Vec3]) -> Result<Vec<TriangleIndices>, C
             count: vertices.len(),
         });
     }
-    if let Some((index,_)) = vertices.iter().enumerate().find(|(_,v)| !v.is_finite()) {
+    if let Some((index, _)) = vertices.iter().enumerate().find(|(_, v)| !v.is_finite()) {
         return Err(ConvexHullError::NonFiniteVertex { index });
     }
 

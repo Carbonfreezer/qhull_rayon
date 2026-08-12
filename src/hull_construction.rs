@@ -183,21 +183,29 @@ impl<'a> HullConstructor<'a> {
             // Mark and collect
             let mut vertices_to_reassign = Vec::new();
             let mut all_edges = FxHashSet::default();
-            for tri in &mut self.hull_triangles {
+
+            // Collect triangle indices to delete.
+            let mut to_delete = Vec::new();
+            for (i, tri) in self.hull_triangles.iter().enumerate() {
                 if tri.get_signed_distance(next_vertex) > 0.0 {
-                    tri.mark_deleted();
-                    vertices_to_reassign.extend(tri.regarded_vertices());
-                    all_edges.extend(tri.edges());
+                    to_delete.push(i);
                 }
             }
 
+            // Delete triangles, reassign vertices and collect edges.
+            for &i in to_delete.iter().rev() {
+                let tri = self.hull_triangles.swap_remove(i);
+                vertices_to_reassign.extend(tri.regarded_vertices());
+                all_edges.extend(tri.edges());
+            }
+
+            // Get the seam edges.
             let boundary: Vec<_> = all_edges.iter()
                 .filter(|e| !all_edges.contains(&e.reversed()))
                 .copied()
                 .collect();
 
-            self.hull_triangles.retain(|tri| !tri.is_deleted());
-
+            // Create new triangles and reassign vertices.            
             let mut new_triangles: Vec<_> = boundary.iter()
                 .map(|e| Triangle::from_edge_and_points(self.vertices, e, next_vertex))
                 .collect();

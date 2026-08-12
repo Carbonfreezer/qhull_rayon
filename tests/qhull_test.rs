@@ -129,3 +129,11 @@ fn broken_mesh_test() {
     let test = Mesh::new(&[], &[TriangleIndices(0,0,0)]);
     assert_eq!(test, Err(IndexOutOfBoundsError{index : 0}), "Index of out bounds should have been reached");
 }
+
+
+#[test]
+fn first_test() {
+    let positions = [Vec3{x:0.0, y:0.0, z:0.0}, Vec3{x:1.0, y:0.0, z:0.0}, Vec3{x:0.0, y:1.0, z:0.0}, Vec3{x:0.0, y:0.0, z:1.0}, Vec3{x:0.1, y:0.1, z:0.1}];
+    let result = generate_convex_hull(&positions).unwrap();
+    assert_eq!(result.len(), 4, "We should get the four triangles of the outer tetrahedron");
+}

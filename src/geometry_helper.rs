@@ -30,6 +30,10 @@ pub(crate) struct Triangle<'a> {
     used_indices: [usize; 3],
     /// The edges we have.
     used_edges: [Edge; 3],
+    /// The vertices we take control over.
+    pub(crate) regarded_vertices: Vec<usize>,
+    /// The furthest away vertex we have we we have one.
+    pub(crate) furthest_vertex_and_dist : Option<(usize, f32)>
 }
 
 impl<'a> Triangle<'a> {
@@ -57,6 +61,8 @@ impl<'a> Triangle<'a> {
                     end: indices[0],
                 },
             ],
+            regarded_vertices : Vec::new(),
+            furthest_vertex_and_dist : None
         }
     }
 
@@ -94,6 +100,22 @@ impl<'a> Triangle<'a> {
     pub(crate) fn get_signed_distance(&self, other_index: usize) -> f32 {
         self.normal
             .dot(self.base_vertices[other_index] - self.base_point)
+    }
+    
+    
+    
+    /// Assigns the vertex to our responsibility
+    pub (crate) fn assign_vertex(&mut self, candidate: usize) {
+        self.regarded_vertices.push(candidate);
+        let dist = self.get_signed_distance(candidate);
+        if let Some((_, old_dist)) = self.furthest_vertex_and_dist {
+            if dist > old_dist {
+                self.furthest_vertex_and_dist = Some((candidate, dist));
+            }
+        }
+        else {
+            self.furthest_vertex_and_dist = Some((candidate, dist));
+        }
     }
 
     pub(crate) fn edges(&self) -> [Edge; 3] {

@@ -518,7 +518,6 @@ dependencies = [
  "proptest",
  "qhull_rayon",
  "rand 0.10.2",
- "rayon",
  "tobj",
 ]
 

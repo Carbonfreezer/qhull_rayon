@@ -15,7 +15,6 @@ pub mod test_utils;
 
 use crate::hull_construction::HullConstructor;
 pub use glam::Vec3;
-use rayon::prelude::{IndexedParallelIterator, IntoParallelRefIterator};
 
 /// The Triangle with its three indices; these are the indices that refer to the vector that has been
 /// handed over. The triangles are generated in CCW order seen from the outside.
@@ -111,7 +110,7 @@ pub fn generate_convex_hull(vertices: &[Vec3]) -> Result<Vec<TriangleIndices>, C
             count: vertices.len(),
         });
     }
-    if let Some(index) = vertices.par_iter().position_any(|v| !v.is_finite()) {
+    if let Some((index,_)) = vertices.iter().enumerate().find(|(_,v)| !v.is_finite()) {
         return Err(ConvexHullError::NonFiniteVertex { index });
     }
 

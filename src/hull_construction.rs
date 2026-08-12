@@ -4,23 +4,16 @@ use crate::geometry_helper::Triangle;
 use crate::{ConvexHullError, TriangleIndices};
 use fxhash::FxHashSet;
 use glam::Vec3;
-use rayon::prelude::{
-    IndexedParallelIterator, IntoParallelRefIterator, ParallelIterator,
-};
 
 const RELATIVE_TOLERANCE: f32 = 1e-5;
 
 /// Computes the numerical tolerance based on the bounding box diagonal
 pub(crate) fn compute_tolerance_value(vertices: &[Vec3]) -> f32 {
     let (min, max) = vertices
-        .par_iter()
+        .iter()
         .fold(
-            || (Vec3::INFINITY, Vec3::NEG_INFINITY),
+            (Vec3::INFINITY, Vec3::NEG_INFINITY),
             |(lo, hi), v| (lo.min(*v), hi.max(*v)),
-        )
-        .reduce(
-            || (Vec3::INFINITY, Vec3::NEG_INFINITY),
-            |(min_a, max_a), (min_b, max_b)| (min_a.min(min_b), max_a.max(max_b)),
         );
     (max - min).length() * RELATIVE_TOLERANCE
 }
@@ -41,7 +34,7 @@ fn get_best_index_and_remove(
     probe_function: impl Fn(usize) -> f32 + Sync,
 ) -> usize {
     let (inner_index, result, _) = vertex_list
-        .par_iter()
+        .iter()
         .enumerate()
         .map(|(field_ind, vert_ind)| (field_ind, vert_ind, probe_function(*vert_ind)))
         .max_by(|(_, _, val_a), (_, _, val_b)| val_a.total_cmp(val_b))

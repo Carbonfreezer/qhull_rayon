@@ -31,12 +31,23 @@ pub(crate) struct Triangle<'a> {
     /// The edges we have.
     used_edges: [Edge; 3],
     /// The vertices we take control over.
-    pub(crate) regarded_vertices: Vec<usize>,
+    regarded_vertices: Vec<usize>,
     /// The furthest away vertex we have we we have one.
-    pub(crate) furthest_vertex_and_dist : Option<(usize, f32)>
+    furthest_vertex_and_dist : Option<(usize, f32)>
 }
 
 impl<'a> Triangle<'a> {
+
+    /// Asks for the vertex index that is furthest away for this triangle if existing.
+    pub fn furthest_vertex_and_dist(&self) -> Option<(usize, f32)> {
+        self.furthest_vertex_and_dist
+    }
+
+    /// Asks for the vertices we are responsible for.
+    pub fn regarded_vertices(&self) -> impl Iterator<Item=&usize> + '_  {
+        self.regarded_vertices.iter()
+    }
+
     /// Creates a new triangle from three indices; the indices must be given in CCW order.
     pub(crate) fn new(base_vertices: &'a [Vec3], indices: [usize; 3]) -> Self {
         let base_point = base_vertices[indices[0]];
@@ -101,9 +112,9 @@ impl<'a> Triangle<'a> {
         self.normal
             .dot(self.base_vertices[other_index] - self.base_point)
     }
-    
-    
-    
+
+
+
     /// Assigns the vertex to our responsibility
     pub (crate) fn assign_vertex(&mut self, candidate: usize) {
         self.regarded_vertices.push(candidate);

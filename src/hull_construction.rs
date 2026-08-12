@@ -167,12 +167,12 @@ impl<'a> HullConstructor<'a> {
         Ok(())
     }
 
-    /// Gets the best candidate.
+    /// Gets the best candidate if it exists.
     fn get_best_vertex(&self) -> Option<usize> {
         let (candidate,_) = self.hull_triangles.iter().fold(
             (None, f32::NEG_INFINITY),
             |(probe, best_dist), tri| {
-                if let Some((vertex, dist)) = tri.furthest_vertex_and_dist && dist > best_dist {
+                if let Some((vertex, dist)) = tri.furthest_vertex_and_dist() && dist > best_dist {
                     (Some(vertex), dist)
                 } else {
                     (probe, best_dist)
@@ -196,7 +196,7 @@ impl<'a> HullConstructor<'a> {
             // Now we need to get the iterator over all deleted triangles.
             let mut vertices_to_reassign : Vec<usize> = Vec::new();
             for tri in &deleted {
-                vertices_to_reassign.extend(tri.regarded_vertices.iter());
+                vertices_to_reassign.extend(tri.regarded_vertices());
             }
             
             // Extract the outer boundary edges of the elements that get deleted.

@@ -62,7 +62,8 @@ fn assign_vertices_to_tris(
     tolerance: f32,
 ) {
     let transfer = vertices
-        .par_iter()
+        .iter()
+        //.par_iter()
         .filter(|&x| *x != exclusion_vert)
         .filter_map(|vert_index| {
             let (best_tri, _) = triangles.iter().enumerate().fold(

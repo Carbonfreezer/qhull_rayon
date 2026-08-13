@@ -1,7 +1,7 @@
-//! This module contains a complete mesh; it is intended for the case that an indexing into the old
+//! This module contains a complete mesh; it is intended for the case where indexing into the old
 //! vertices is not sufficient, but a completely separate structure of vertices and triangle indices is wanted.
 //! It rebuilds a new vertex array from existing data. It can be used with or independently of the
-//! convex hull calculation. The point of the structure is, that it filters out unused vertices.
+//! convex hull calculation. The point of the structure is to filter out unused vertices.
 
 use crate::TriangleIndices;
 use fxhash::FxHashMap;
@@ -11,7 +11,7 @@ use std::io::BufWriter;
 use std::io::Write;
 use std::path::Path;
 
-/// The error that can happen in the construction of a mesh, if one of the indices handed over is not
+/// The error that can happen in the construction of a mesh if one of the indices handed over is not
 /// in the vertex array.
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct IndexOutOfBoundsError {
@@ -29,7 +29,7 @@ impl std::error::Error for IndexOutOfBoundsError {}
 
 /// A complete mesh consisting of vertices with the position and the triangle indices.
 /// When the mesh is constructed from the data of the convex hull generator, the
-/// triangles are in counterclockwise  order seen from the outside.
+/// triangles are in counterclockwise order when viewed from the outside.
 #[derive(Debug, Clone, Default, PartialEq)]
 pub struct Mesh {
     /// The vertex positions of the mesh.

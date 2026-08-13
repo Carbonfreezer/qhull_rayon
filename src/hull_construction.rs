@@ -1,10 +1,12 @@
-// ! This part contains the real construction of the convex hull.
+//! This part contains the real construction of the convex hull.
 
 use crate::geometry_helper::Triangle;
 use crate::{ConvexHullError, TriangleIndices};
 use fxhash::FxHashSet;
 use glam::Vec3;
 
+
+/// This is a floating-point rounding error compensator.
 const RELATIVE_TOLERANCE: f32 = 1e-5;
 
 /// Computes the numerical tolerance based on the bounding box diagonal
@@ -17,6 +19,8 @@ pub(crate) fn compute_tolerance_value(vertices: &[Vec3]) -> f32 {
     (max - min).length() * RELATIVE_TOLERANCE
 }
 
+
+/// The core structure for computing the hull.
 pub(crate) struct HullConstructor<'a> {
     /// The vertices we still need to process.
     vertices: &'a [Vec3],
@@ -44,20 +48,20 @@ fn get_best_index_and_remove(
     res
 }
 
-/// Assigns the vertices handed over, except the exclusion vertex over to the triangles. We pick the triangle we have the largest distance to
-/// the exlusion vertex is discarded, this is typically the new vertex coming in. A certain minimum distance must be kept.
+/// Assigns the vertices handed over, except the exclusion vertex, to the triangles. We pick the triangle we have the largest distance to.
+/// The exclusion vertex is discarded; this is typically the new vertex coming in. A certain minimum distance must be kept.
 fn assign_vertices_to_tris(
     vertices: &[usize],
     exclusion_vert: usize,
     triangles: &mut [Triangle],
-    tolerance: f32,
+    min_distance: f32,
 ) {
     let transfer = vertices
         .iter()
         .filter(|&x| *x != exclusion_vert)
         .filter_map(|vert_index| {
             let (best_tri, _) = triangles.iter().enumerate().fold(
-                (None, tolerance),
+                (None, min_distance),
                 |(best, best_dist), (tri_index, triangle)| {
                     let dist = triangle.get_signed_distance(*vert_index);
                     if dist > best_dist {
@@ -115,9 +119,9 @@ impl<'a> HullConstructor<'a> {
         });
         let pos2 = self.vertices[i2];
         let b = pos2 - pos0;
-        // Gram Schmidt step.
+        //Gram-Schmidt step.
         let dir_b = (b - b.dot(dir_a) * dir_a).normalize_or_zero();
-        // The fourth and last point is the point the furthest away from the constructed plane.
+        // The fourth and last point is the point furthest away from the constructed plane.
         let i3 = get_best_index_and_remove(&mut vertex_list, |i| {
             let delta = self.vertices[i] - pos0;
             let point_on_plane = pos0 + delta.dot(dir_a) * dir_a + delta.dot(dir_b) * dir_b;
@@ -153,7 +157,7 @@ impl<'a> HullConstructor<'a> {
         Ok(())
     }
 
-    /// Gets the best candidate if it exists.
+    /// Gets the best candidate if it exists. This is the vertex being furthest outside the hull.
     fn get_best_vertex(&self) -> Option<usize> {
         let (candidate, _) = self.hull_triangles.iter().fold(
             (None, f32::NEG_INFINITY),

@@ -1,4 +1,5 @@
 //! Contains some helpers for the convex hull computation.
+//! This is mainly information about triangles and edges.
 
 use crate::TriangleIndices;
 use glam::Vec3;
@@ -18,6 +19,7 @@ impl Edge {
     }
 }
 
+/// The triangle representation with all cached values needed for q-hull.
 #[derive(Clone, Debug)]
 pub(crate) struct Triangle<'a> {
     /// The base vertices we are based on.
@@ -31,20 +33,20 @@ pub(crate) struct Triangle<'a> {
     /// The edges we have.
     used_edges: [Edge; 3],
     /// The vertices we take control over.
-    regarded_vertices: Vec<usize>,
-    /// The furthest away vertex we have we we have one.
+    assigned_vertices: Vec<usize>,
+    /// The furthest-away vertex we have, if we have one.
     furthest_vertex_and_dist: Option<(usize, f32)>,
 }
 
 impl<'a> Triangle<'a> {
-    /// Asks for the vertex index that is furthest away for this triangle if existing.
+    /// Asks for the vertex index that is furthest away for this triangle, if it exists.
     pub fn furthest_vertex_and_dist(&self) -> Option<(usize, f32)> {
         self.furthest_vertex_and_dist
     }
 
     /// Asks for the vertices we are responsible for.
     pub fn regarded_vertices(&self) -> impl Iterator<Item = &usize> + '_ {
-        self.regarded_vertices.iter()
+        self.assigned_vertices.iter()
     }
 
     /// Creates a new triangle from three indices; the indices must be given in CCW order.
@@ -71,7 +73,7 @@ impl<'a> Triangle<'a> {
                     end: indices[0],
                 },
             ],
-            regarded_vertices: Vec::new(),
+            assigned_vertices: Vec::new(),
             furthest_vertex_and_dist: None,
         }
     }
@@ -114,7 +116,7 @@ impl<'a> Triangle<'a> {
 
     /// Assigns the vertex to our responsibility
     pub(crate) fn assign_vertex(&mut self, candidate: usize) {
-        self.regarded_vertices.push(candidate);
+        self.assigned_vertices.push(candidate);
         let dist = self.get_signed_distance(candidate);
         if let Some((_, old_dist)) = self.furthest_vertex_and_dist {
             if dist > old_dist {

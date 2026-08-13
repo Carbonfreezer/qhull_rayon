@@ -1,4 +1,4 @@
-//! This module contains a series of methods that are meant for profiling and testing.
+//! This module contains a series of methods intended for profiling and testing.
 //! They fall into the category of generating vertices to generate convex hulls from and for
 //! making consistency checks on computed convex hulls.
 
@@ -122,7 +122,7 @@ pub fn consistency_check(
     Ok(())
 }
 
-/// Generates an  axis parallel cube with several inner points. Additional vertices are the number
+/// Generates an axis-parallel cube with several inner points. Additional vertices are the number
 /// of vertices that come on top of 27 vertices that are already on the surface of the cube.
 ///
 /// # Example
@@ -197,7 +197,7 @@ pub fn generate_sphere(scale: f32, vertices: usize, seed: u64) -> Vec<Vec3> {
 
 /// Generates a random hollow sphere used for testing and profiling.
 /// Vertices are only located on the sphere surface.
-/// This is the worst case assumption for this algorithm.
+/// This is the worst-case assumption for this algorithm.
 ///
 /// # Example
 /// ```

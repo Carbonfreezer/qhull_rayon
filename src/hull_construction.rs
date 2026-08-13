@@ -5,7 +5,6 @@ use crate::{ConvexHullError, TriangleIndices};
 use fxhash::FxHashSet;
 use glam::Vec3;
 
-
 /// This is a floating-point rounding error compensator.
 const RELATIVE_TOLERANCE: f32 = 1e-5;
 
@@ -18,7 +17,6 @@ pub(crate) fn compute_tolerance_value(vertices: &[Vec3]) -> f32 {
         });
     (max - min).length() * RELATIVE_TOLERANCE
 }
-
 
 /// The core structure for computing the hull.
 pub(crate) struct HullConstructor<'a> {
@@ -201,10 +199,8 @@ impl<'a> HullConstructor<'a> {
             // Get the seam edges.
             let mut new_triangles: Vec<_> = all_edges
                 .iter()
-                .filter_map(|e| {
-                    (!all_edges.contains(&e.reversed()))
-                        .then(|| Triangle::from_edge_and_points(self.vertices, e, next_vertex))
-                })
+                .filter(|&e| !all_edges.contains(&e.reversed()))
+                .map(|e| Triangle::from_edge_and_points(self.vertices, e, next_vertex))
                 .collect();
 
             assign_vertices_to_tris(

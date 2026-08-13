@@ -1,7 +1,7 @@
-//! This library contains an implementation of the q-hull algorithm using [glam](https://docs.rs/glam/latest/glam/) 
+//! This library contains an implementation of the q-hull algorithm using [glam](https://docs.rs/glam/latest/glam/)
 //! for vector algebra. It is an adaptation of [q-hull](https://en.wikipedia.org/wiki/Quickhull) for three dimensions.
 //! This library shines performance-wise when you can expect many inner vertices that do not belong to the hull, which
-//! is the standard use case for collision geometry. The package name *qhull_rayon* has a historical reason. An earlier
+//! is the standard use case for collision geometry. The crate name *qhull_rayon* has a historical reason. An earlier
 //! version of this library was parallelized with rayon. After a substantial optimization, this turned out to be counterproductive.  
 
 #![warn(missing_docs)]

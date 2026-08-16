@@ -15,8 +15,7 @@ it is around n^1.7.
 The direct way to use the algorithm is by:
 
 ```rust
-use glam::Vec3;
-use qhull_rayon::generate_convex_hull;
+use qhull_rayon::{generate_convex_hull, Vec3};
 let positions = [Vec3{x:0.0, y:0.0, z:0.0}, Vec3{x:1.0, y:0.0, z:0.0}, Vec3{x:0.0, y:1.0, z:0.0}, Vec3{x:0.0, y:0.0, z:1.0}, Vec3{x:0.1, y:0.1, z:0.1}];
 let result = generate_convex_hull(&positions)?;
 assert_eq!(result.len(), 4, "We should get the four triangles of the outer tetrahedron");
@@ -27,15 +26,16 @@ that are part of the convex hull, you can use the `Mesh` structure, which is par
 The contents can also be saved as a Wavefront OBJ file.
 
 ```rust
-use glam::Vec3;
-use qhull_rayon::generate_convex_hull;
+use qhull_rayon::{generate_convex_hull, Vec3};
 use qhull_rayon::mesh::Mesh;
 let positions = [Vec3{x:0.0, y:0.0, z:0.0}, Vec3{x:1.0, y:0.0, z:0.0}, Vec3{x:0.0, y:1.0, z:0.0}, Vec3{x:0.0, y:0.0, z:1.0}, Vec3{x:0.1, y:0.1, z:0.1}];
 let indices = generate_convex_hull(&positions)?;
 let new_mesh = Mesh::new(&positions, &indices)?;
 new_mesh.save_as_obj_file(Path::new("Processed.obj"))?;
-assert_eq!(new_mesh.vertices.len(), 4, "We should have exactly four vertices left.");    
+assert_eq!(new_mesh.vertices().len(), 4, "We should have exactly four vertices left.");
 ```
+
+If you do not want to use the `Vec3` that comes with the specific version of glam `33.3` alternative functions that operate on `[f32;3]` are provided.
 
 The entry in `cargo.toml` can be done in two ways: the standard way. 
 

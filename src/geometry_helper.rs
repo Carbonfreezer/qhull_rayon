@@ -45,7 +45,7 @@ impl<'a> Triangle<'a> {
     }
 
     /// Asks for the vertices we are responsible for.
-    pub fn regarded_vertices(&self) -> impl Iterator<Item = &usize> + '_ {
+    pub fn assigned_vertices(&self) -> impl Iterator<Item = &usize> + '_ {
         self.assigned_vertices.iter()
     }
 

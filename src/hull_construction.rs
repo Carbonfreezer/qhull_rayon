@@ -192,7 +192,7 @@ impl<'a> HullConstructor<'a> {
             // Delete triangles, reassign vertices and collect edges.
             for &i in to_delete.iter().rev() {
                 let tri = self.hull_triangles.swap_remove(i);
-                vertices_to_reassign.extend(tri.regarded_vertices());
+                vertices_to_reassign.extend(tri.assigned_vertices());
                 all_edges.extend(tri.edges());
             }
 

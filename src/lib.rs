@@ -14,6 +14,8 @@ pub mod mesh;
 pub mod test_utils;
 
 use crate::hull_construction::HullConstructor;
+
+/// The Vec3 from glam v0.33.3:  
 pub use glam::Vec3;
 
 /// The Triangle with its three indices; these are the indices that refer to the vector that has been
@@ -95,8 +97,7 @@ impl std::error::Error for ConvexHullError {}
 /// # use std::error::Error;
 /// #
 /// # fn main() -> Result<(), Box<dyn Error>> {
-/// use glam::Vec3;
-/// use qhull_rayon::generate_convex_hull;
+/// use qhull_rayon::{generate_convex_hull, Vec3};
 /// let positions = [Vec3{x:0.0, y:0.0, z:0.0}, Vec3{x:1.0, y:0.0, z:0.0}, Vec3{x:0.0, y:1.0, z:0.0}, Vec3{x:0.0, y:0.0, z:1.0}, Vec3{x:0.1, y:0.1, z:0.1}];
 /// let result = generate_convex_hull(&positions)?;
 /// assert_eq!(result.len(), 4, "We should get the four triangles of the outer tetrahedron");

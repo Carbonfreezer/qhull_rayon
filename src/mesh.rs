@@ -75,8 +75,7 @@ impl Mesh {
     /// # use std::error::Error;
     /// #
     /// # fn main() -> Result<(), Box<dyn Error>> {
-    /// use glam::Vec3;
-    /// use qhull_rayon::generate_convex_hull;
+    /// use qhull_rayon::{generate_convex_hull, Vec3};
     /// use qhull_rayon::mesh::Mesh;
     /// let positions = [Vec3{x:0.0, y:0.0, z:0.0}, Vec3{x:1.0, y:0.0, z:0.0}, Vec3{x:0.0, y:1.0, z:0.0}, Vec3{x:0.0, y:0.0, z:1.0}, Vec3{x:0.1, y:0.1, z:0.1}];
     /// let indices = generate_convex_hull(&positions)?;
@@ -131,8 +130,7 @@ impl Mesh {
     /// # use std::error::Error;
     /// #
     /// # fn main() -> Result<(), Box<dyn Error>> {
-    /// use glam::Vec3;
-    /// use qhull_rayon::generate_convex_hull;
+    /// use qhull_rayon::{generate_convex_hull, Vec3};
     /// use qhull_rayon::mesh::Mesh;
     /// use std::path::Path;
     /// let positions = [Vec3{x:0.0, y:0.0, z:0.0}, Vec3{x:1.0, y:0.0, z:0.0}, Vec3{x:0.0, y:1.0, z:0.0}, Vec3{x:0.0, y:0.0, z:1.0}, Vec3{x:0.1, y:0.1, z:0.1}];

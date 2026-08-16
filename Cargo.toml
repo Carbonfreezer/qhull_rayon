@@ -1,6 +1,6 @@
 [package]
 name = "qhull_rayon"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2024"
 description = "Three dimensional q-hull algorithm."
 repository = "https://github.com/Carbonfreezer/qhull_rayon"

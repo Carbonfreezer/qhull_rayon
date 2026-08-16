@@ -35,7 +35,7 @@ new_mesh.save_as_obj_file(Path::new("Processed.obj"))?;
 assert_eq!(new_mesh.vertices().len(), 4, "We should have exactly four vertices left.");
 ```
 
-If you do not want to use the `Vec3` that comes with the specific version of glam `33.3` alternative functions that operate on `[f32;3]` are provided.
+If you do not want to use the `Vec3` that comes with the specific version of glam `33.3`, alternative functions that operate on `[f32;3]` are provided.
 
 The entry in `cargo.toml` can be done in two ways: the standard way. 
 

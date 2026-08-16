@@ -1,5 +1,6 @@
 //! This library contains an implementation of the q-hull algorithm using [glam](https://docs.rs/glam/latest/glam/)
-//! for vector algebra. It is an adaptation of [q-hull](https://en.wikipedia.org/wiki/Quickhull) for three dimensions.
+//! for vector algebra. If you do not use glam or an incompatible version to 0.33.3, raw functions are implemented that operate on `[f32;3]` representations.
+//! The crate is an adaptation of [q-hull](https://en.wikipedia.org/wiki/Quickhull) for three dimensions.
 //! This library shines performance-wise when you can expect many inner vertices that do not belong to the hull, which
 //! is the standard use case for collision geometry. The crate name *qhull_rayon* has a historical reason. An earlier
 //! version of this library was parallelized with rayon. After a substantial optimization, this turned out to be counterproductive.  
@@ -106,6 +107,7 @@ impl std::error::Error for ConvexHullError {}
 /// # }
 /// ```
 pub fn generate_convex_hull(vertices: &[Vec3]) -> Result<Vec<TriangleIndices>, ConvexHullError> {
+    let vertices: &[Vec3] = bytemuck::cast_slice(vertices);
     if vertices.len() < 4 {
         return Err(ConvexHullError::TooFewVertices {
             count: vertices.len(),
@@ -117,4 +119,32 @@ pub fn generate_convex_hull(vertices: &[Vec3]) -> Result<Vec<TriangleIndices>, C
 
     let mut constructor = HullConstructor::new(vertices);
     constructor.generate_convex_hull()
+}
+
+/// Structurally the same as [generate_convex_hull] useful if you do not use glam internally or a different version then 0.33.3
+///
+/// # Error
+/// This function returns a [convex hull error](ConvexHullError) in the following cases
+/// 1. There are fewer than 4 vertices handed over.
+/// 2. One of the vertices has an infinite or a NaN component.
+/// 3. The vertices handed over are coplanar, collinear, or the same.
+///
+/// # Example
+/// ```
+/// # use std::error::Error;
+/// #
+/// # fn main() -> Result<(), Box<dyn Error>> {
+/// use qhull_rayon::{generate_convex_hull_from_raw};
+/// let positions = [[0.0, 0.0, 0.0], [1.0, 0.0, 0.0], [0.0, 1.0, 0.0], [0.0, 0.0, 1.0], [0.1, 0.1, 0.1]];
+/// let result = generate_convex_hull_from_raw(&positions)?;
+/// assert_eq!(result.len(), 4, "We should get the four triangles of the outer tetrahedron");
+/// #
+/// #     Ok(())
+/// # }
+/// ```
+pub fn generate_convex_hull_from_raw(
+    vertices: &[[f32; 3]],
+) -> Result<Vec<TriangleIndices>, ConvexHullError> {
+    let vertices: &[Vec3] = bytemuck::cast_slice(vertices);
+    generate_convex_hull(vertices)
 }

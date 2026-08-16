@@ -51,7 +51,7 @@ impl Mesh {
         &self.vertices
     }
 
-    /// Asks for the vertices inf raw form.
+    /// Asks for the vertices in raw form.
     ///
     /// # Example
     /// ```
@@ -127,7 +127,7 @@ impl Mesh {
         })
     }
 
-    /// Structurally the same as [Mesh::new] useful if you do not use glam internally or a different version then 0.33.3.
+    /// Structurally the same as [Mesh::new]; useful if you do not use glam internally or a different version than 0.33.3.
     ///
     /// # Error
     /// If one of the triangles contains an index that is not in the mesh, an error is returned.
@@ -156,11 +156,11 @@ impl Mesh {
         Self::new(vertices, triangles)
     }
 
-    /// Saves the current mesh as a simple Wavefront obj file. Plain positions and triangle indices
+    /// Saves the current mesh as a simple Wavefront OBJ file. Plain positions and triangle indices
     /// are saved.
     ///
     /// # Error
-    /// The io errors on file access.
+    /// I/O errors on file access.
     ///
     /// # Example
     ///

@@ -90,7 +90,7 @@ impl std::error::Error for ConvexHullError {}
 /// # Error
 /// This function returns a [convex hull error](ConvexHullError) in the following cases
 /// 1. There are fewer than 4 vertices handed over.
-/// 2. One of the vertices has an infinite or a NaN component.
+/// 2. One of the vertices has an infinite or NaN component.
 /// 3. The vertices handed over are coplanar, collinear, or the same.
 ///
 /// # Example
@@ -121,12 +121,12 @@ pub fn generate_convex_hull(vertices: &[Vec3]) -> Result<Vec<TriangleIndices>, C
     constructor.generate_convex_hull()
 }
 
-/// Structurally the same as [generate_convex_hull] useful if you do not use glam internally or a different version then 0.33.3
+/// Structurally the same as [generate_convex_hull], useful if you do not use glam internally or a different version than 0.33.3
 ///
 /// # Error
 /// This function returns a [convex hull error](ConvexHullError) in the following cases
 /// 1. There are fewer than 4 vertices handed over.
-/// 2. One of the vertices has an infinite or a NaN component.
+/// 2. One of the vertices has an infinite or NaN component.
 /// 3. The vertices handed over are coplanar, collinear, or the same.
 ///
 /// # Example

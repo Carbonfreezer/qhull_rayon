@@ -4,7 +4,6 @@ use glam::Vec3;
 use qhull_rayon::generate_convex_hull;
 use qhull_rayon::mesh::Mesh;
 use std::path::Path;
-use tobj;
 use tobj::LoadError;
 
 /// Uses the tobj library to load the obj file, goes over all models in the obj file and collects the data.

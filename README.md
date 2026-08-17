@@ -7,7 +7,9 @@
 This is an optimized version of the [q-hull](https://en.wikipedia.org/wiki/Quickhull) algorithm in 3D. 
 The name q-hull rayon has historical reasons, because the first implementation was made with rayon. After a 
 substantial optimization, the parallelized version was slower than the non-parallelized one.
-For vertices, it uses the [glam library](https://docs.rs/glam/latest/glam/) and works on `f32`. For many inner vertices in the convex hull, the time complexity
+For vertices, it uses the [glam library](https://docs.rs/glam/latest/glam/) version `0.33.3` and works on `f32`. Alternative functions that operate on `[f32;3]` are provided. 
+
+For many inner vertices in the convex hull, the time complexity
 of this algorithm is approximately linear, and for the worst case, where all vertices handed over are part of the convex hull,
 it is around n^1.7.
 ## Basic usage example
@@ -35,7 +37,7 @@ new_mesh.save_as_obj_file(Path::new("Processed.obj"))?;
 assert_eq!(new_mesh.vertices().len(), 4, "We should have exactly four vertices left.");
 ```
 
-If you do not want to use the `Vec3` that comes with the specific version of glam `33.3`, alternative functions that operate on `[f32;3]` are provided.
+If you do not want to use the `Vec3` that comes with the specific version of glam `0.33.3`, alternative functions that operate on `[f32;3]` are provided.
 
 The entry in `cargo.toml` can be done in two ways: the standard way. 
 

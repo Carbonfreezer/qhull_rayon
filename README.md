@@ -115,7 +115,7 @@ to smaller vertex counts. The timing result is shown in this table:
 | 1_000    | 2.25      |
 | 1_200    | 3.02      |
 | 1_300    | 3.42      |
-| 1_300    | 3.9       |
+| 1_400    | 3.9       |
 | 1_500    | 4.3       |
 | 2_000    | 7.01      |
 
